@@ -44,8 +44,8 @@ impl HidrawDevice {
                 _ => Error::Io(e),
             })?;
 
-        // Get report descriptor size via ioctl
-        let report_size = ioctl::ioctl_read_int(&file, sys::HIDIOCGRDESCSIZE)? as usize;
+        // Get report descriptor size via ioctl (using rustix)
+        let report_size = ioctl::get_report_descriptor_size(&file)? as usize;
 
         Ok(Self {
             file,
@@ -126,31 +126,14 @@ impl HidrawDevice {
 
     /// Get device info via ioctl
     pub fn get_raw_info(&self) -> Result<sys::HidrawDevInfo> {
-        let mut info = sys::HidrawDevInfo {
-            bustype: 0,
-            vendor: 0,
-            product: 0,
-        };
-
-        ioctl::ioctl_read(&self.file, sys::HIDIOCGRAWINFO, &mut info)?;
-
-        Ok(info)
+        // Using rustix for fixed-size struct
+        ioctl::get_raw_info(&self.file)
     }
 
     /// Get device name
     pub fn get_raw_name(&self) -> Result<String> {
-        let mut buf = vec![0u8; 256];
-
-        let len = ioctl::ioctl_read_buf(&self.file, sys::HIDIOCGRAWNAME, &mut buf)?;
-
-        // Truncate at null terminator or actual length
-        if let Some(null_pos) = buf.iter().position(|&b| b == 0) {
-            buf.truncate(null_pos);
-        } else {
-            buf.truncate(len);
-        }
-
-        String::from_utf8(buf).map_err(|_| Error::Parse("Invalid UTF-8 in device name".to_string()))
+        // Using rustix for fixed 256-byte buffer
+        ioctl::get_raw_name(&self.file)
     }
 }
 

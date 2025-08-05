@@ -32,12 +32,26 @@ let ret = unsafe { libc::ioctl(fd_raw, request as libc::c_ulong, &mut value) };
 
 ## Alternatives Considered and Current Approach
 
-### 1. rustix ioctl module (Hybrid Approach - IMPLEMENTED)
+### 1. rustix ioctl module (Hybrid Approach - FULLY IMPLEMENTED)
 Initially not available in rustix 0.38, but **now available in rustix 1.0.8** which we've upgraded to.
 
 **Current hybrid approach**:
-- **rustix ioctl for fixed-size operations**: We use rustix's type-safe `Getter` pattern for ioctls with compile-time known sizes (e.g., HIDIOCGRDESCSIZE, HIDIOCGRAWINFO)
-- **libc for runtime-sized operations**: We continue using direct libc calls for ioctls where the buffer size is determined at runtime (e.g., hidiocgfeature, hidiocsfeature)
+- **rustix ioctl for fixed-size operations**: We use rustix's type-safe `Getter` pattern for ioctls with compile-time known sizes:
+  - `HIDIOCGRDESCSIZE` → `get_report_descriptor_size()` 
+  - `HIDIOCGRAWINFO` → `get_raw_info()`
+  - `HIDIOCGRAWNAME` → `get_raw_name()`
+  - `HIDIOCGRAWPHYS` → `get_raw_phys()` (available but unused)
+  - `HIDIOCGRAWUNIQ` → `get_raw_uniq()` (available but unused)
+  - `HIDIOCGRDESC` → `get_report_descriptor()` (available but unused)
+
+- **libc for runtime-sized operations**: We continue using direct libc calls for ioctls where the buffer size is determined at runtime:
+  - `hidiocgfeature(len)` - size is part of opcode
+  - `hidiocsfeature(len)` - size is part of opcode
+
+**Module structure**:
+- `ioctl.rs` - Facade module that re-exports from both implementations
+- `ioctl_rustix.rs` - Rustix-based implementations for fixed-size operations
+- `ioctl_libc.rs` - Libc-based implementations for runtime-sized operations
 
 **Why the hybrid approach**:
 ```rust
@@ -51,7 +65,7 @@ pub fn hidiocgfeature(len: usize) -> u32 {
 }
 ```
 
-**Result**: We still have 8 unsafe blocks, but the code is slightly cleaner and more type-safe for fixed-size operations.
+**Result**: We still have 8 unsafe blocks, but the code is cleaner, more type-safe, and better organized. The facade pattern provides a unified interface while keeping implementation details separate.
 
 ### 2. nix crate
 The nix crate was thoroughly evaluated as an alternative. However, it would **not** eliminate unsafe code:
