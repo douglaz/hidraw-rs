@@ -22,8 +22,14 @@ fn main() -> Result<()> {
     for (i, device) in devices.iter().enumerate() {
         println!("Device {number}:", number = i + 1);
         println!("  Path: {path}", path = device.path.display());
-        println!("  Vendor ID: 0x{vendor_id:04x}", vendor_id = device.vendor_id);
-        println!("  Product ID: 0x{product_id:04x}", product_id = device.product_id);
+        println!(
+            "  Vendor ID: 0x{vendor_id:04x}",
+            vendor_id = device.vendor_id
+        );
+        println!(
+            "  Product ID: 0x{product_id:04x}",
+            product_id = device.product_id
+        );
 
         if let Some(manufacturer) = &device.manufacturer {
             println!("  Manufacturer: {manufacturer}");
@@ -37,7 +43,10 @@ fn main() -> Result<()> {
             println!("  Serial: {serial}");
         }
 
-        println!("  Interface: {interface}", interface = device.interface_number);
+        println!(
+            "  Interface: {interface}",
+            interface = device.interface_number
+        );
         println!();
     }
 

@@ -100,7 +100,10 @@ async fn main() -> Result<()> {
             println!("Read {n} bytes");
             let len = (response[0] & 0x3F) as usize;
             if len > 0 && len < 64 {
-                println!("Version: {version}", version = String::from_utf8_lossy(&response[1..=len]));
+                println!(
+                    "Version: {version}",
+                    version = String::from_utf8_lossy(&response[1..=len])
+                );
             }
         }
         Err(e) => println!("Read error: {e}"),

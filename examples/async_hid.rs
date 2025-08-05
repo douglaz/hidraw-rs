@@ -39,7 +39,10 @@ async fn main() -> Result<()> {
 
     // Use the first device
     let device_info = &devices[0];
-    println!("\nOpening device: {name}", name = device_info.display_name());
+    println!(
+        "\nOpening device: {name}",
+        name = device_info.display_name()
+    );
 
     // Open the device asynchronously
     let mut device = AsyncHidDevice::open(device_info).await?;

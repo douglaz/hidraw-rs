@@ -47,7 +47,10 @@ fn main() -> Result<()> {
     let ping_msg = b"Hello from pure-rust-hid!";
     match coldcard.ping(ping_msg) {
         Ok(response) => {
-            println!("Ping response: {response:?}", response = String::from_utf8_lossy(&response));
+            println!(
+                "Ping response: {response:?}",
+                response = String::from_utf8_lossy(&response)
+            );
         }
         Err(e) => {
             eprintln!("Ping failed: {e}");

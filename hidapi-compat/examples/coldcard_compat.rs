@@ -23,14 +23,20 @@ fn main() -> HidResult<()> {
         .filter(|dev| dev.vendor_id() == COINKITE_VID && dev.product_id() == CKCC_PID)
         .collect();
 
-    println!("\nFound {count} Coldcard device(s)", count = coldcards.len());
+    println!(
+        "\nFound {count} Coldcard device(s)",
+        count = coldcards.len()
+    );
 
     // Print device info like rust-coldcard does
     for (i, device) in coldcards.iter().enumerate() {
         println!("\nColdcard #{number}:", number = i + 1);
         println!("  Path: {path:?}", path = device.path());
         println!("  Serial: {serial:?}", serial = device.serial_number());
-        println!("  Manufacturer: {manufacturer:?}", manufacturer = device.manufacturer_string());
+        println!(
+            "  Manufacturer: {manufacturer:?}",
+            manufacturer = device.manufacturer_string()
+        );
         println!("  Product: {product:?}", product = device.product_string());
     }
 

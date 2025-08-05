@@ -47,13 +47,22 @@ fn test_device_info() -> Result<(), HidError> {
         println!("✅ vendor_id() works: {vid:04x}", vid = device.vendor_id());
 
         let _pid = device.product_id();
-        println!("✅ product_id() works: {pid:04x}", pid = device.product_id());
+        println!(
+            "✅ product_id() works: {pid:04x}",
+            pid = device.product_id()
+        );
 
         let _serial = device.serial_number();
-        println!("✅ serial_number() works: {serial:?}", serial = device.serial_number());
+        println!(
+            "✅ serial_number() works: {serial:?}",
+            serial = device.serial_number()
+        );
 
         let _release = device.release_number();
-        println!("✅ release_number() works: {release}", release = device.release_number());
+        println!(
+            "✅ release_number() works: {release}",
+            release = device.release_number()
+        );
 
         let _manufacturer = device.manufacturer_string();
         println!(
@@ -62,16 +71,25 @@ fn test_device_info() -> Result<(), HidError> {
         );
 
         let _product = device.product_string();
-        println!("✅ product_string() works: {product:?}", product = device.product_string());
+        println!(
+            "✅ product_string() works: {product:?}",
+            product = device.product_string()
+        );
 
         let _usage_page = device.usage_page();
-        println!("✅ usage_page() works: {usage_page}", usage_page = device.usage_page());
+        println!(
+            "✅ usage_page() works: {usage_page}",
+            usage_page = device.usage_page()
+        );
 
         let _usage = device.usage();
         println!("✅ usage() works: {usage}", usage = device.usage());
 
         let _interface = device.interface_number();
-        println!("✅ interface_number() works: {interface}", interface = device.interface_number());
+        println!(
+            "✅ interface_number() works: {interface}",
+            interface = device.interface_number()
+        );
     } else {
         println!("⚠️  No devices found to test DeviceInfo");
     }
@@ -140,9 +158,7 @@ fn test_device_operations() -> Result<(), HidError> {
             println!("✅ get_indexed_string() works");
         }
         Err(_) => {
-            println!(
-                "⚠️  No test device found (VID:{TEST_VID:04x} PID:{TEST_PID:04x})"
-            );
+            println!("⚠️  No test device found (VID:{TEST_VID:04x} PID:{TEST_PID:04x})");
             println!("    Device operations tests skipped");
         }
     }

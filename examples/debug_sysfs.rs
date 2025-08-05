@@ -10,13 +10,19 @@ fn main() {
     println!("============================================\n");
 
     println!("Device path: {path}", path = device_path.display());
-    println!("Is symlink: {is_symlink}", is_symlink = device_path.is_symlink());
+    println!(
+        "Is symlink: {is_symlink}",
+        is_symlink = device_path.is_symlink()
+    );
 
     if device_path.is_symlink() {
         match fs::read_link(device_path) {
             Ok(target) => {
                 println!("Symlink target: {target}", target = target.display());
-                println!("Is relative: {is_relative}", is_relative = target.is_relative());
+                println!(
+                    "Is relative: {is_relative}",
+                    is_relative = target.is_relative()
+                );
 
                 // Resolve to absolute path
                 let absolute = if target.is_relative() {
@@ -52,7 +58,10 @@ fn main() {
                         println!("\nAlt Level {i}: {path}", path = alt_current.display());
 
                         let vendor_path = alt_current.join("idVendor");
-                        println!("  Checking for idVendor: {exists}", exists = vendor_path.exists());
+                        println!(
+                            "  Checking for idVendor: {exists}",
+                            exists = vendor_path.exists()
+                        );
 
                         if vendor_path.exists() {
                             println!("  FOUND! Reading vendor/product IDs...");
