@@ -40,8 +40,14 @@ jobs:
     - name: Check formatting
       run: nix develop -c cargo fmt --all --check
     
-    - name: Run linting
-      run: nix develop -c cargo clippy --locked --workspace --all-targets -- --deny warnings --allow deprecated
+    - name: Run linting (default features)
+      run: nix develop -c cargo clippy --locked --workspace --all-targets -- --deny warnings
+    
+    - name: Run linting (async feature)
+      run: nix develop -c cargo clippy --locked --workspace --all-targets --features async -- --deny warnings
+    
+    - name: Run linting (all features)
+      run: nix develop -c cargo clippy --locked --workspace --all-targets --all-features -- --deny warnings
     
     - name: Build default
       run: nix develop -c cargo build --all
