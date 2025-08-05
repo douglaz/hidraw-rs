@@ -9,4 +9,4 @@ pub use device::HidrawDevice;
 pub use enumerate::{enumerate, get_device_info};
 
 // Re-export system constants that might be useful
-pub use sys::{HIDIOCGRDESCSIZE, HIDIOCGRDESC};
+pub use sys::{HIDIOCGRDESC, HIDIOCGRDESCSIZE};

@@ -1,7 +1,7 @@
 //! HID protocol implementation
 
-mod reports;
 mod framing;
+mod reports;
 
-pub use reports::{ReportType, HidReport};
 pub use framing::{frame_packets, unframe_packets};
+pub use reports::{HidReport, ReportType};

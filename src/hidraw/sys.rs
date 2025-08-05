@@ -17,10 +17,7 @@ const IOC_READ: u32 = 2;
 
 /// Generate ioctl command number
 const fn _ioc(dir: u32, type_: u32, nr: u32, size: u32) -> u32 {
-    (dir << IOC_DIRSHIFT) |
-    (type_ << IOC_TYPESHIFT) |
-    (nr << IOC_NRSHIFT) |
-    (size << IOC_SIZESHIFT)
+    (dir << IOC_DIRSHIFT) | (type_ << IOC_TYPESHIFT) | (nr << IOC_NRSHIFT) | (size << IOC_SIZESHIFT)
 }
 
 /// ioctl command for read operations

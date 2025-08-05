@@ -5,10 +5,10 @@ use hidraw_rs::prelude::*;
 
 fn main() -> Result<()> {
     println!("Looking for Coldcard devices...");
-    
+
     // Find Coldcard devices
     let devices = find_devices(COINKITE_VID, COLDCARD_PID)?;
-    
+
     if devices.is_empty() {
         eprintln!("No Coldcard devices found!");
         eprintln!("\nMake sure:");
@@ -19,11 +19,11 @@ fn main() -> Result<()> {
     }
 
     println!("Found {} Coldcard device(s)", devices.len());
-    
+
     // Open the first Coldcard
     println!("\nOpening Coldcard...");
     let mut coldcard = ColdcardDevice::open()?;
-    
+
     // Display device info
     let info = coldcard.info();
     println!("Device info:");

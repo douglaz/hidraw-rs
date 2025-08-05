@@ -1,12 +1,12 @@
 //! Low-level hidraw device operations
 
-use crate::{Error, Result};
 use crate::hidraw::{ioctl, sys};
+use crate::{Error, Result};
 use std::fs::File;
-use std::os::unix::io::{AsRawFd, RawFd};
-use std::os::unix::fs::FileTypeExt;
-use std::path::{Path, PathBuf};
 use std::io::{Read, Write};
+use std::os::unix::fs::FileTypeExt;
+use std::os::unix::io::{AsRawFd, RawFd};
+use std::path::{Path, PathBuf};
 
 /// Low-level hidraw device handle
 pub struct HidrawDevice {
@@ -19,12 +19,11 @@ impl HidrawDevice {
     /// Open a hidraw device by path
     pub fn open(path: &Path) -> Result<Self> {
         // Check if path exists and is a character device
-        let metadata = std::fs::metadata(path)
-            .map_err(|e| match e.kind() {
-                std::io::ErrorKind::NotFound => Error::DeviceNotFound,
-                std::io::ErrorKind::PermissionDenied => Error::PermissionDenied,
-                _ => Error::Io(e),
-            })?;
+        let metadata = std::fs::metadata(path).map_err(|e| match e.kind() {
+            std::io::ErrorKind::NotFound => Error::DeviceNotFound,
+            std::io::ErrorKind::PermissionDenied => Error::PermissionDenied,
+            _ => Error::Io(e),
+        })?;
 
         // On Linux, hidraw devices are character devices
         if !metadata.file_type().is_char_device() {
@@ -43,19 +42,18 @@ impl HidrawDevice {
                 std::io::ErrorKind::PermissionDenied => Error::PermissionDenied,
                 _ => Error::Io(e),
             })?;
-        
+
         // Get report descriptor size via ioctl
-        let report_size = unsafe {
-            ioctl::ioctl_read_int(file.as_raw_fd(), sys::HIDIOCGRDESCSIZE)? as usize
-        };
-        
+        let report_size =
+            unsafe { ioctl::ioctl_read_int(file.as_raw_fd(), sys::HIDIOCGRDESCSIZE)? as usize };
+
         Ok(Self {
             file,
             path: path.to_owned(),
             report_size,
         })
     }
-    
+
     /// Get the device path
     pub fn path(&self) -> &Path {
         &self.path
@@ -76,49 +74,49 @@ impl HidrawDevice {
             }
         })
     }
-    
+
     /// Write a HID report
     pub fn write(&mut self, data: &[u8]) -> Result<usize> {
         if data.is_empty() {
-            return Err(Error::InvalidParameter("Cannot write empty data".to_string()));
+            return Err(Error::InvalidParameter(
+                "Cannot write empty data".to_string(),
+            ));
         }
-        
+
         // Check if data exceeds typical HID report size
         if data.len() > 4096 {
             return Err(Error::InvalidParameter(format!(
-                "Data too large: {} bytes (max 4096)", data.len()
+                "Data too large: {} bytes (max 4096)",
+                data.len()
             )));
         }
-        
-        self.file.write(data).map_err(|e| {
-            match e.kind() {
-                std::io::ErrorKind::BrokenPipe => Error::Disconnected,
-                std::io::ErrorKind::PermissionDenied => Error::PermissionDenied,
-                std::io::ErrorKind::NotConnected => Error::Disconnected,
-                _ => Error::Io(e)
-            }
+
+        self.file.write(data).map_err(|e| match e.kind() {
+            std::io::ErrorKind::BrokenPipe => Error::Disconnected,
+            std::io::ErrorKind::PermissionDenied => Error::PermissionDenied,
+            std::io::ErrorKind::NotConnected => Error::Disconnected,
+            _ => Error::Io(e),
         })
     }
-    
+
     /// Get a feature report
     pub fn get_feature_report(&mut self, report_id: u8, buf: &mut [u8]) -> Result<usize> {
         if buf.is_empty() {
-            return Err(Error::InvalidParameter("Buffer cannot be empty".to_string()));
+            return Err(Error::InvalidParameter(
+                "Buffer cannot be empty".to_string(),
+            ));
         }
 
         // First byte must be the report ID
         buf[0] = report_id;
-        
+
         unsafe {
-            let res = ioctl::ioctl_read_buf(
-                self.file.as_raw_fd(),
-                sys::hidiocgfeature(buf.len()),
-                buf,
-            )?;
+            let res =
+                ioctl::ioctl_read_buf(self.file.as_raw_fd(), sys::hidiocgfeature(buf.len()), buf)?;
             Ok(res)
         }
     }
-    
+
     /// Send a feature report
     pub fn send_feature_report(&mut self, data: &[u8]) -> Result<()> {
         if data.is_empty() {
@@ -126,11 +124,7 @@ impl HidrawDevice {
         }
 
         unsafe {
-            ioctl::ioctl_write_buf(
-                self.file.as_raw_fd(),
-                sys::hidiocsfeature(data.len()),
-                data,
-            )?;
+            ioctl::ioctl_write_buf(self.file.as_raw_fd(), sys::hidiocsfeature(data.len()), data)?;
         }
         Ok(())
     }
@@ -144,11 +138,7 @@ impl HidrawDevice {
         };
 
         unsafe {
-            ioctl::ioctl_read(
-                self.file.as_raw_fd(),
-                sys::HIDIOCGRAWINFO,
-                &mut info,
-            )?;
+            ioctl::ioctl_read(self.file.as_raw_fd(), sys::HIDIOCGRAWINFO, &mut info)?;
         }
 
         Ok(info)
@@ -157,14 +147,10 @@ impl HidrawDevice {
     /// Get device name
     pub fn get_raw_name(&self) -> Result<String> {
         let mut buf = vec![0u8; 256];
-        
+
         unsafe {
-            let len = ioctl::ioctl_read_buf(
-                self.file.as_raw_fd(),
-                sys::HIDIOCGRAWNAME,
-                &mut buf,
-            )?;
-            
+            let len = ioctl::ioctl_read_buf(self.file.as_raw_fd(), sys::HIDIOCGRAWNAME, &mut buf)?;
+
             // Truncate at null terminator or actual length
             if let Some(null_pos) = buf.iter().position(|&b| b == 0) {
                 buf.truncate(null_pos);
@@ -173,8 +159,7 @@ impl HidrawDevice {
             }
         }
 
-        String::from_utf8(buf)
-            .map_err(|_| Error::Parse("Invalid UTF-8 in device name".to_string()))
+        String::from_utf8(buf).map_err(|_| Error::Parse("Invalid UTF-8 in device name".to_string()))
     }
 }
 

@@ -9,7 +9,7 @@ pub unsafe fn ioctl_read<T>(fd: RawFd, request: u32, arg: *mut T) -> Result<i32>
     let ret = libc::ioctl(fd, request as libc::c_int, arg);
     #[cfg(not(target_env = "musl"))]
     let ret = libc::ioctl(fd, request as libc::c_ulong, arg);
-    
+
     if ret < 0 {
         Err(Error::Io(std::io::Error::last_os_error()))
     } else {
@@ -23,7 +23,7 @@ pub unsafe fn ioctl_write<T>(fd: RawFd, request: u32, arg: *const T) -> Result<i
     let ret = libc::ioctl(fd, request as libc::c_int, arg);
     #[cfg(not(target_env = "musl"))]
     let ret = libc::ioctl(fd, request as libc::c_ulong, arg);
-    
+
     if ret < 0 {
         Err(Error::Io(std::io::Error::last_os_error()))
     } else {
@@ -44,7 +44,7 @@ pub unsafe fn ioctl_read_buf(fd: RawFd, request: u32, buf: &mut [u8]) -> Result<
     let ret = libc::ioctl(fd, request as libc::c_int, buf.as_mut_ptr());
     #[cfg(not(target_env = "musl"))]
     let ret = libc::ioctl(fd, request as libc::c_ulong, buf.as_mut_ptr());
-    
+
     if ret < 0 {
         Err(Error::Io(std::io::Error::last_os_error()))
     } else {
@@ -58,7 +58,7 @@ pub unsafe fn ioctl_write_buf(fd: RawFd, request: u32, buf: &[u8]) -> Result<usi
     let ret = libc::ioctl(fd, request as libc::c_int, buf.as_ptr());
     #[cfg(not(target_env = "musl"))]
     let ret = libc::ioctl(fd, request as libc::c_ulong, buf.as_ptr());
-    
+
     if ret < 0 {
         Err(Error::Io(std::io::Error::last_os_error()))
     } else {

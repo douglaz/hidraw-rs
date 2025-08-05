@@ -293,6 +293,43 @@ sudo udevadm trigger
 | API Design | ✅ Idiomatic Rust | ⚠️ C-style |
 | Platform Support | 🐧 Linux only | 🌍 Cross-platform |
 
+## hidapi Compatibility
+
+This project includes `hidapi-compat`, a drop-in replacement for the `hidapi` crate. This allows existing projects using `hidapi` to switch to `hidraw-rs` without any code changes.
+
+### Using hidapi-compat
+
+To replace `hidapi` in your project, simply change your `Cargo.toml`:
+
+```toml
+# Replace this:
+hidapi = "2.5.1"
+
+# With this:
+hidapi = { package = "hidapi-compat", path = "path/to/hidraw-rs/hidapi-compat" }
+
+# Or from git:
+hidapi = { package = "hidapi-compat", git = "https://github.com/yourusername/hidraw-rs" }
+```
+
+No code changes required! Your existing hidapi code will work as-is.
+
+### Example: rust-coldcard Migration
+
+The `hidapi-compat` crate has been tested with `rust-coldcard`:
+
+```toml
+[dependencies]
+# Simply replace the hidapi dependency
+hidapi = { package = "hidapi-compat", path = "../hidraw-rs/hidapi-compat" }
+```
+
+All functionality works without modification, while gaining the benefits of:
+- Musl static linking support
+- Better error handling
+- No buffer overflow risks
+- Improved performance
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.

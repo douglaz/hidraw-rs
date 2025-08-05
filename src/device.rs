@@ -1,12 +1,12 @@
 //! High-level HID device interface
 
-use crate::{Error, Result};
 use crate::hidraw::HidrawDevice;
+use crate::{Error, Result};
 use std::path::PathBuf;
 use std::time::Duration;
 
 #[cfg(feature = "serde")]
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 /// Information about a HID device
 #[derive(Debug, Clone)]
@@ -37,7 +37,10 @@ impl DeviceInfo {
     /// Get a display name for the device
     pub fn display_name(&self) -> String {
         if let Some(product) = &self.product {
-            format!("{} ({:04x}:{:04x})", product, self.vendor_id, self.product_id)
+            format!(
+                "{} ({:04x}:{:04x})",
+                product, self.vendor_id, self.product_id
+            )
         } else {
             format!("HID Device {:04x}:{:04x}", self.vendor_id, self.product_id)
         }
@@ -66,10 +69,10 @@ impl HidDevice {
     pub fn open_path(path: &str) -> Result<Self> {
         let path = PathBuf::from(path);
         let raw = HidrawDevice::open(&path)?;
-        
+
         // Try to get device info from sysfs
         let info = crate::hidraw::get_device_info(&path)?;
-        
+
         Ok(Self {
             raw,
             info,
@@ -80,9 +83,8 @@ impl HidDevice {
     /// Open the first device matching vendor and product ID
     pub fn open_first(vendor_id: u16, product_id: u16) -> Result<Self> {
         let devices = crate::find_devices(vendor_id, product_id)?;
-        let device_info = devices.into_iter().next()
-            .ok_or(Error::DeviceNotFound)?;
-        
+        let device_info = devices.into_iter().next().ok_or(Error::DeviceNotFound)?;
+
         Self::open(&device_info)
     }
 
@@ -139,29 +141,31 @@ impl HidDevice {
     /// Internal implementation of read with timeout
     fn read_timeout_impl(&mut self, buf: &mut [u8], timeout: Duration) -> Result<usize> {
         use std::os::unix::io::AsRawFd;
-        
+
         if buf.is_empty() {
-            return Err(Error::InvalidParameter("Buffer cannot be empty".to_string()));
+            return Err(Error::InvalidParameter(
+                "Buffer cannot be empty".to_string(),
+            ));
         }
-        
+
         // Convert timeout to milliseconds, capping at i32::MAX
         let timeout_ms = timeout.as_millis().min(i32::MAX as u128) as i32;
-        
+
         // Use poll() for timeout
         let mut pollfd = libc::pollfd {
             fd: self.raw.as_raw_fd(),
             events: libc::POLLIN,
             revents: 0,
         };
-        
+
         let ret = unsafe { libc::poll(&mut pollfd, 1, timeout_ms) };
-        
+
         if ret < 0 {
             return Err(Error::Io(std::io::Error::last_os_error()));
         } else if ret == 0 {
             return Err(Error::Timeout);
         }
-        
+
         // Check for error conditions
         if pollfd.revents & libc::POLLERR != 0 {
             return Err(Error::io_error("Poll error on device"));
@@ -169,32 +173,32 @@ impl HidDevice {
         if pollfd.revents & libc::POLLHUP != 0 {
             return Err(Error::Disconnected);
         }
-        
+
         self.raw.read(buf)
     }
 
     /// Internal implementation of write with timeout
     fn write_timeout_impl(&mut self, data: &[u8], timeout: Duration) -> Result<usize> {
         use std::os::unix::io::AsRawFd;
-        
+
         // Convert timeout to milliseconds, capping at i32::MAX
         let timeout_ms = timeout.as_millis().min(i32::MAX as u128) as i32;
-        
+
         // Use poll() for timeout
         let mut pollfd = libc::pollfd {
             fd: self.raw.as_raw_fd(),
             events: libc::POLLOUT,
             revents: 0,
         };
-        
+
         let ret = unsafe { libc::poll(&mut pollfd, 1, timeout_ms) };
-        
+
         if ret < 0 {
             return Err(Error::Io(std::io::Error::last_os_error()));
         } else if ret == 0 {
             return Err(Error::Timeout);
         }
-        
+
         // Check for error conditions
         if pollfd.revents & libc::POLLERR != 0 {
             return Err(Error::io_error("Poll error on device"));
@@ -202,7 +206,7 @@ impl HidDevice {
         if pollfd.revents & libc::POLLHUP != 0 {
             return Err(Error::Disconnected);
         }
-        
+
         self.raw.write(data)
     }
 }

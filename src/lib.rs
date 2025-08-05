@@ -33,26 +33,29 @@
 //! }
 //! ```
 
+pub mod device;
 pub mod error;
 pub mod hidraw;
 pub mod protocol;
-pub mod device;
 
 #[cfg(feature = "async")]
 pub mod async_io;
 
 pub mod coldcard;
 
+#[cfg(feature = "hidapi-compat")]
+pub mod hidapi_compat;
+
 // Re-exports for convenience
+pub use device::{DeviceInfo, HidDevice};
 pub use error::{Error, Result};
-pub use device::{HidDevice, DeviceInfo};
 pub use hidraw::enumerate;
 
 /// Prelude module for convenient imports
 pub mod prelude {
-    pub use crate::{Error, Result};
-    pub use crate::{HidDevice, DeviceInfo};
     pub use crate::{enumerate, find_devices};
+    pub use crate::{DeviceInfo, HidDevice};
+    pub use crate::{Error, Result};
 }
 
 /// Find devices matching vendor and product ID

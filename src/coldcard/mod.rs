@@ -1,7 +1,7 @@
 //! Coldcard hardware wallet support
 
-mod protocol;
 mod constants;
+mod protocol;
 
-pub use protocol::{ColdcardDevice, ColdcardProtocol};
 pub use constants::{COINKITE_VID, COLDCARD_PID};
+pub use protocol::{ColdcardDevice, ColdcardProtocol};

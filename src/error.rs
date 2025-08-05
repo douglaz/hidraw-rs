@@ -86,10 +86,11 @@ impl Error {
     pub fn is_disconnected(&self) -> bool {
         match self {
             Error::Disconnected => true,
-            Error::Io(e) => matches!(e.kind(), 
-                io::ErrorKind::UnexpectedEof | 
-                io::ErrorKind::BrokenPipe |
-                io::ErrorKind::NotConnected
+            Error::Io(e) => matches!(
+                e.kind(),
+                io::ErrorKind::UnexpectedEof
+                    | io::ErrorKind::BrokenPipe
+                    | io::ErrorKind::NotConnected
             ),
             _ => false,
         }
