@@ -1,0 +1,29 @@
+[package]
+name = "hidapi-compat"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+license = "MIT OR Apache-2.0"
+description = "hidapi-compatible interface for hidraw-rs"
+repository = "https://github.com/yourusername/hidraw-rs"
+keywords = ["hid", "usb", "hidapi", "compatibility", "hidraw"]
+categories = ["hardware-support", "api-bindings"]
+
+# This allows using hidapi-compat as "hidapi" in dependencies
+[package.metadata]
+provides = "hidapi"
+
+[dependencies]
+hidraw-rs = { path = ".." }
+libc = "0.2"
+thiserror = "1.0"
+
+[dev-dependencies]
+tokio = { version = "1.40", features = ["full"] }
+
+[features]
+default = []
+# Feature flag to match hidapi's linux-static-hidraw
+linux-static-hidraw = []
+# Feature flag to match hidapi's linux-static-libusb
+linux-static-libusb = []

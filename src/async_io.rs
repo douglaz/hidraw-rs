@@ -2,13 +2,13 @@
 //!
 //! This module provides async versions of HID device operations using tokio.
 
-use crate::{Error, Result, DeviceInfo};
-use crate::hidraw::{HidrawDevice, sys};
+use crate::hidraw::{sys, HidrawDevice};
+use crate::{DeviceInfo, Error, Result};
+use std::os::unix::io::{AsRawFd, FromRawFd};
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 use tokio::fs::File;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
-use std::os::unix::io::{AsRawFd, FromRawFd};
 
 /// Async version of HidrawDevice
 pub struct AsyncHidrawDevice {
@@ -22,10 +22,10 @@ impl AsyncHidrawDevice {
     pub async fn open(path: &Path) -> Result<Self> {
         // First open synchronously to perform all the checks and ioctls
         let sync_device = HidrawDevice::open(path)?;
-        
+
         // Extract the file descriptor and convert to tokio File
         let raw_fd = sync_device.as_raw_fd();
-        let file = unsafe { 
+        let file = unsafe {
             // Duplicate the fd to avoid closing it when sync_device is dropped
             let new_fd = libc::dup(raw_fd);
             if new_fd < 0 {
@@ -33,14 +33,14 @@ impl AsyncHidrawDevice {
             }
             File::from_raw_fd(new_fd)
         };
-        
+
         Ok(Self {
             file,
             path: path.to_owned(),
             report_size: sync_device.report_size(),
         })
     }
-    
+
     /// Get the device path
     pub fn path(&self) -> &Path {
         &self.path
@@ -61,7 +61,7 @@ impl AsyncHidrawDevice {
             }
         })
     }
-    
+
     /// Write a HID report asynchronously
     pub async fn write(&mut self, data: &[u8]) -> Result<usize> {
         self.file.write(data).await.map_err(|e| {
@@ -72,14 +72,14 @@ impl AsyncHidrawDevice {
             }
         })
     }
-    
+
     /// Read with timeout
     pub async fn read_timeout(&mut self, buf: &mut [u8], timeout: Duration) -> Result<usize> {
         tokio::time::timeout(timeout, self.read(buf))
             .await
             .map_err(|_| Error::Timeout)?
     }
-    
+
     /// Write with timeout
     pub async fn write_timeout(&mut self, data: &[u8], timeout: Duration) -> Result<usize> {
         tokio::time::timeout(timeout, self.write(data))
@@ -90,12 +90,14 @@ impl AsyncHidrawDevice {
     /// Get a feature report (synchronous - ioctl doesn't have async variant)
     pub fn get_feature_report(&self, report_id: u8, buf: &mut [u8]) -> Result<usize> {
         if buf.is_empty() {
-            return Err(Error::InvalidParameter("Buffer cannot be empty".to_string()));
+            return Err(Error::InvalidParameter(
+                "Buffer cannot be empty".to_string(),
+            ));
         }
 
         // First byte must be the report ID
         buf[0] = report_id;
-        
+
         unsafe {
             let res = crate::hidraw::ioctl::ioctl_read_buf(
                 self.file.as_raw_fd(),
@@ -105,7 +107,7 @@ impl AsyncHidrawDevice {
             Ok(res)
         }
     }
-    
+
     /// Send a feature report (synchronous - ioctl doesn't have async variant)
     pub fn send_feature_report(&self, data: &[u8]) -> Result<()> {
         if data.is_empty() {
@@ -149,22 +151,18 @@ impl AsyncHidDevice {
     pub async fn open_path(path: &str) -> Result<Self> {
         let path = PathBuf::from(path);
         let raw = AsyncHidrawDevice::open(&path).await?;
-        
+
         // Try to get device info from sysfs
         let info = crate::hidraw::get_device_info(&path)?;
-        
-        Ok(Self {
-            raw,
-            info,
-        })
+
+        Ok(Self { raw, info })
     }
 
     /// Open the first device matching vendor and product ID
     pub async fn open_first(vendor_id: u16, product_id: u16) -> Result<Self> {
         let devices = crate::find_devices(vendor_id, product_id)?;
-        let device_info = devices.into_iter().next()
-            .ok_or(Error::DeviceNotFound)?;
-        
+        let device_info = devices.into_iter().next().ok_or(Error::DeviceNotFound)?;
+
         Self::open(&device_info).await
     }
 

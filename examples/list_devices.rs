@@ -10,7 +10,9 @@ fn main() -> Result<()> {
 
     if devices.is_empty() {
         println!("No HID devices found.");
-        println!("\nNote: You may need to run this as root or add your user to the appropriate group.");
+        println!(
+            "\nNote: You may need to run this as root or add your user to the appropriate group."
+        );
         return Ok(());
     }
 
@@ -22,19 +24,19 @@ fn main() -> Result<()> {
         println!("  Path: {}", device.path.display());
         println!("  Vendor ID: 0x{:04x}", device.vendor_id);
         println!("  Product ID: 0x{:04x}", device.product_id);
-        
+
         if let Some(manufacturer) = &device.manufacturer {
             println!("  Manufacturer: {}", manufacturer);
         }
-        
+
         if let Some(product) = &device.product {
             println!("  Product: {}", product);
         }
-        
+
         if let Some(serial) = &device.serial_number {
             println!("  Serial: {}", serial);
         }
-        
+
         println!("  Interface: {}", device.interface_number);
         println!();
     }
@@ -42,7 +44,7 @@ fn main() -> Result<()> {
     // Look for specific devices
     println!("Looking for Coldcard devices...");
     let coldcards = find_devices(0xd13e, 0xcc10)?;
-    
+
     if coldcards.is_empty() {
         println!("No Coldcard devices found.");
     } else {

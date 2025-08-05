@@ -6,7 +6,7 @@ use std::time::Duration;
 fn main() -> Result<()> {
     // Get the first HID device
     let devices = enumerate()?;
-    
+
     if devices.is_empty() {
         eprintln!("No HID devices found!");
         return Ok(());
@@ -43,7 +43,7 @@ fn main() -> Result<()> {
     // Example: Read input report with timeout
     println!("\nReading from device (1 second timeout)...");
     let mut buffer = vec![0u8; 64];
-    
+
     match device.read(&mut buffer) {
         Ok(n) => {
             println!("Read {} bytes:", n);

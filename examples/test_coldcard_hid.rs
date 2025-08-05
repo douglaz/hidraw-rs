@@ -1,7 +1,7 @@
 //! Test HID operations specifically with Coldcard
 
-use hidraw_rs::prelude::*;
 use hidraw_rs::coldcard::{COINKITE_VID, COLDCARD_PID};
+use hidraw_rs::prelude::*;
 use std::time::Duration;
 
 fn main() -> Result<()> {
@@ -10,7 +10,7 @@ fn main() -> Result<()> {
 
     // Find Coldcard device
     let devices = find_devices(COINKITE_VID, COLDCARD_PID)?;
-    
+
     if devices.is_empty() {
         eprintln!("No Coldcard devices found!");
         return Ok(());
@@ -35,7 +35,7 @@ fn main() -> Result<()> {
     packet[0] = (ping_cmd.len() + test_data.len()) as u8 | 0x80; // Length + last packet flag
     packet[1..5].copy_from_slice(ping_cmd);
     packet[5..5 + test_data.len()].copy_from_slice(test_data);
-    
+
     match device.write(&packet) {
         Ok(n) => println!("Wrote {} bytes", n),
         Err(e) => println!("Write error: {}", e),
@@ -44,14 +44,17 @@ fn main() -> Result<()> {
     // Test 2: Read response with timeout
     println!("\nTest 2: Reading response (500ms timeout)...");
     let mut response = vec![0u8; 64];
-    
+
     match device.read_timeout(&mut response, Duration::from_millis(500)) {
         Ok(n) => {
             println!("Read {} bytes", n);
             let len = (response[0] & 0x3F) as usize;
             println!("Response length field: {}", len);
             if len > 0 && len < 64 {
-                println!("Response data: {:?}", String::from_utf8_lossy(&response[1..=len]));
+                println!(
+                    "Response data: {:?}",
+                    String::from_utf8_lossy(&response[1..=len])
+                );
             }
         }
         Err(Error::Timeout) => println!("Read timed out"),
@@ -64,7 +67,7 @@ fn main() -> Result<()> {
     let mut packet = vec![0u8; 64];
     packet[0] = version_cmd.len() as u8 | 0x80;
     packet[1..5].copy_from_slice(version_cmd);
-    
+
     match device.write_timeout(&packet, Duration::from_millis(100)) {
         Ok(n) => println!("Wrote {} bytes with timeout", n),
         Err(e) => println!("Write timeout error: {}", e),
@@ -92,7 +95,10 @@ fn main() -> Result<()> {
             println!("Data: {:02x?}", &feature_buf[..n.min(16)]);
         }
         Err(e) => {
-            println!("Get feature report error: {} (this is normal for Coldcard)", e);
+            println!(
+                "Get feature report error: {} (this is normal for Coldcard)",
+                e
+            );
         }
     }
 

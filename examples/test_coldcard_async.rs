@@ -1,11 +1,11 @@
 //! Test async HID operations with Coldcard
 
 #[cfg(feature = "async")]
-use hidraw_rs::prelude::*;
-#[cfg(feature = "async")]
 use hidraw_rs::async_io::AsyncHidDevice;
 #[cfg(feature = "async")]
 use hidraw_rs::coldcard::{COINKITE_VID, COLDCARD_PID};
+#[cfg(feature = "async")]
+use hidraw_rs::prelude::*;
 #[cfg(feature = "async")]
 use std::time::Duration;
 
@@ -23,7 +23,7 @@ async fn main() -> Result<()> {
 
     // Find Coldcard device
     let devices = find_devices(COINKITE_VID, COLDCARD_PID)?;
-    
+
     if devices.is_empty() {
         eprintln!("No Coldcard devices found!");
         return Ok(());
@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
     packet[0] = (ping_cmd.len() + test_data.len()) as u8 | 0x80;
     packet[1..5].copy_from_slice(ping_cmd);
     packet[5..5 + test_data.len()].copy_from_slice(test_data);
-    
+
     match device.write(&packet).await {
         Ok(n) => println!("Wrote {} bytes asynchronously", n),
         Err(e) => println!("Async write error: {}", e),
@@ -56,13 +56,19 @@ async fn main() -> Result<()> {
     // Test 2: Async read with timeout
     println!("\nTest 2: Async read with timeout (500ms)...");
     let mut response = vec![0u8; 64];
-    
-    match device.read_timeout(&mut response, Duration::from_millis(500)).await {
+
+    match device
+        .read_timeout(&mut response, Duration::from_millis(500))
+        .await
+    {
         Ok(n) => {
             println!("Read {} bytes asynchronously", n);
             let len = (response[0] & 0x3F) as usize;
             if len > 0 && len < 64 {
-                println!("Response: {:?}", String::from_utf8_lossy(&response[1..=len]));
+                println!(
+                    "Response: {:?}",
+                    String::from_utf8_lossy(&response[1..=len])
+                );
             }
         }
         Err(Error::Timeout) => println!("Async read timed out"),
@@ -75,15 +81,21 @@ async fn main() -> Result<()> {
     let mut packet = vec![0u8; 64];
     packet[0] = version_cmd.len() as u8 | 0x80;
     packet[1..5].copy_from_slice(version_cmd);
-    
-    match device.write_timeout(&packet, Duration::from_millis(100)).await {
+
+    match device
+        .write_timeout(&packet, Duration::from_millis(100))
+        .await
+    {
         Ok(n) => println!("Wrote {} bytes with timeout", n),
         Err(e) => println!("Write timeout error: {}", e),
     }
 
     // Read version response
     println!("\nReading version response asynchronously...");
-    match device.read_timeout(&mut response, Duration::from_millis(1000)).await {
+    match device
+        .read_timeout(&mut response, Duration::from_millis(1000))
+        .await
+    {
         Ok(n) => {
             println!("Read {} bytes", n);
             let len = (response[0] & 0x3F) as usize;
@@ -96,9 +108,9 @@ async fn main() -> Result<()> {
 
     // Test 4: Concurrent operations (demonstrate async capabilities)
     println!("\nTest 4: Concurrent timeout operations...");
-    
+
     let mut handles = vec![];
-    
+
     // Spawn 3 async read operations that will timeout
     for i in 0..3 {
         let mut buf = vec![0u8; 64];
@@ -111,7 +123,7 @@ async fn main() -> Result<()> {
         });
         handles.push(handle);
     }
-    
+
     // Wait for all tasks
     for handle in handles {
         let result = handle.await.unwrap();
