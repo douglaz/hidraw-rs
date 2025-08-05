@@ -1,7 +1,6 @@
 //! Test that hidapi-compat properly translates timeouts to match hidapi behavior
 
-use hidapi_compat::{HidApi, HidDevice};
-use std::time::Duration;
+use hidapi_compat::HidApi;
 
 #[test]
 fn test_timeout_returns_zero() {
@@ -42,13 +41,10 @@ fn test_timeout_returns_zero() {
         }
         Ok(n) => {
             // Device actually had data ready
-            println!("Device returned {} bytes (had data ready)", n);
+            println!("Device returned {n} bytes (had data ready)");
         }
         Err(e) => {
-            panic!(
-                "read_timeout should not return error on timeout, got: {:?}",
-                e
-            );
+            panic!("read_timeout should not return error on timeout, got: {e:?}");
         }
     }
 
@@ -59,10 +55,10 @@ fn test_timeout_returns_zero() {
             println!("✓ Non-blocking read correctly returned Ok(0)");
         }
         Ok(n) => {
-            println!("Device returned {} bytes (had data ready)", n);
+            println!("Device returned {n} bytes (had data ready)");
         }
         Err(e) => {
-            panic!("Non-blocking read should not return error, got: {:?}", e);
+            panic!("Non-blocking read should not return error, got: {e:?}");
         }
     }
 }
