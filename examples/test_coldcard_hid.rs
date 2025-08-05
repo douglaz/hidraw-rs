@@ -107,7 +107,7 @@ fn main() -> Result<()> {
     for i in 0..3 {
         println!("\nRead attempt {attempt}", attempt = i + 1);
         match device.read_timeout(&mut response, Duration::from_millis(100)) {
-            Ok(n) => println!("Read {} bytes", n),
+            Ok(n) => println!("Read {n} bytes"),
             Err(Error::Timeout) => println!("Timed out (expected if no data)"),
             Err(e) => println!("Error: {e}"),
         }
