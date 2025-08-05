@@ -41,7 +41,8 @@ jobs:
       run: nix develop -c cargo fmt --all --check
     
     - name: Run linting
-      run: nix develop -c cargo clippy --locked --workspace --all-targets -- --deny warnings --allow deprecated
+      # TODO: Remove --allow clippy::uninlined_format_args once all format strings are updated
+      run: nix develop -c cargo clippy --locked --workspace --all-targets -- --deny warnings --allow deprecated --allow clippy::uninlined_format_args
     
     - name: Build default
       run: nix develop -c cargo build --all
