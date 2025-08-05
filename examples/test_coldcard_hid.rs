@@ -18,9 +18,9 @@ fn main() -> Result<()> {
 
     let device_info = &devices[0];
     println!("Found Coldcard:");
-    println!("  Path: {}", device_info.path.display());
-    println!("  Product: {:?}", device_info.product);
-    println!("  Serial: {:?}", device_info.serial_number);
+    println!("  Path: {path}", path = device_info.path.display());
+    println!("  Product: {product:?}", product = device_info.product);
+    println!("  Serial: {serial:?}", serial = device_info.serial_number);
 
     // Open the device
     println!("\nOpening device...");
@@ -37,8 +37,8 @@ fn main() -> Result<()> {
     packet[5..5 + test_data.len()].copy_from_slice(test_data);
 
     match device.write(&packet) {
-        Ok(n) => println!("Wrote {} bytes", n),
-        Err(e) => println!("Write error: {}", e),
+        Ok(n) => println!("Wrote {n} bytes"),
+        Err(e) => println!("Write error: {e}"),
     }
 
     // Test 2: Read response with timeout
@@ -47,18 +47,18 @@ fn main() -> Result<()> {
 
     match device.read_timeout(&mut response, Duration::from_millis(500)) {
         Ok(n) => {
-            println!("Read {} bytes", n);
+            println!("Read {n} bytes");
             let len = (response[0] & 0x3F) as usize;
-            println!("Response length field: {}", len);
+            println!("Response length field: {len}");
             if len > 0 && len < 64 {
                 println!(
-                    "Response data: {:?}",
-                    String::from_utf8_lossy(&response[1..=len])
+                    "Response data: {data:?}",
+                    data = String::from_utf8_lossy(&response[1..=len])
                 );
             }
         }
         Err(Error::Timeout) => println!("Read timed out"),
-        Err(e) => println!("Read error: {}", e),
+        Err(e) => println!("Read error: {e}"),
     }
 
     // Test 3: Write with timeout
@@ -69,21 +69,21 @@ fn main() -> Result<()> {
     packet[1..5].copy_from_slice(version_cmd);
 
     match device.write_timeout(&packet, Duration::from_millis(100)) {
-        Ok(n) => println!("Wrote {} bytes with timeout", n),
-        Err(e) => println!("Write timeout error: {}", e),
+        Ok(n) => println!("Wrote {n} bytes with timeout"),
+        Err(e) => println!("Write timeout error: {e}"),
     }
 
     // Read version response
     println!("\nReading version response...");
     match device.read_timeout(&mut response, Duration::from_millis(1000)) {
         Ok(n) => {
-            println!("Read {} bytes", n);
+            println!("Read {n} bytes");
             let len = (response[0] & 0x3F) as usize;
             if len > 0 && len < 64 {
-                println!("Version: {}", String::from_utf8_lossy(&response[1..=len]));
+                println!("Version: {version}", version = String::from_utf8_lossy(&response[1..=len]));
             }
         }
-        Err(e) => println!("Read error: {}", e),
+        Err(e) => println!("Read error: {e}"),
     }
 
     // Test 4: Feature reports (may not be supported by Coldcard)
@@ -91,13 +91,12 @@ fn main() -> Result<()> {
     let mut feature_buf = vec![0u8; 64];
     match device.get_feature_report(0x00, &mut feature_buf) {
         Ok(n) => {
-            println!("Got feature report, {} bytes", n);
+            println!("Got feature report, {n} bytes");
             println!("Data: {:02x?}", &feature_buf[..n.min(16)]);
         }
         Err(e) => {
             println!(
-                "Get feature report error: {} (this is normal for Coldcard)",
-                e
+                "Get feature report error: {e} (this is normal for Coldcard)"
             );
         }
     }
@@ -105,11 +104,11 @@ fn main() -> Result<()> {
     // Test 5: Multiple reads to test continuous operation
     println!("\nTest 5: Multiple read operations...");
     for i in 0..3 {
-        println!("\nRead attempt {}", i + 1);
+        println!("\nRead attempt {attempt}", attempt = i + 1);
         match device.read_timeout(&mut response, Duration::from_millis(100)) {
             Ok(n) => println!("Read {} bytes", n),
             Err(Error::Timeout) => println!("Timed out (expected if no data)"),
-            Err(e) => println!("Error: {}", e),
+            Err(e) => println!("Error: {e}"),
         }
     }
 

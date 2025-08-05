@@ -140,7 +140,7 @@ fn get_interface_number(device_path: &Path) -> Result<i32> {
 /// Read a hexadecimal value from a sysfs attribute file
 fn read_hex_attr(path: &Path) -> Result<u16> {
     let content = fs::read_to_string(path)
-        .map_err(|_| Error::Parse(format!("Could not read {}", path.display())))?;
+        .map_err(|_| Error::Parse(format!("Could not read {path}", path = path.display())))?;
 
     let trimmed = content.trim();
     u16::from_str_radix(trimmed, 16)

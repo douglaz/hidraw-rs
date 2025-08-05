@@ -16,28 +16,28 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
-    println!("Found {} HID device(s):\n", devices.len());
+    println!("Found {count} HID device(s):\n", count = devices.len());
 
     // Display each device
     for (i, device) in devices.iter().enumerate() {
-        println!("Device {}:", i + 1);
-        println!("  Path: {}", device.path.display());
-        println!("  Vendor ID: 0x{:04x}", device.vendor_id);
-        println!("  Product ID: 0x{:04x}", device.product_id);
+        println!("Device {number}:", number = i + 1);
+        println!("  Path: {path}", path = device.path.display());
+        println!("  Vendor ID: 0x{vendor_id:04x}", vendor_id = device.vendor_id);
+        println!("  Product ID: 0x{product_id:04x}", product_id = device.product_id);
 
         if let Some(manufacturer) = &device.manufacturer {
-            println!("  Manufacturer: {}", manufacturer);
+            println!("  Manufacturer: {manufacturer}");
         }
 
         if let Some(product) = &device.product {
-            println!("  Product: {}", product);
+            println!("  Product: {product}");
         }
 
         if let Some(serial) = &device.serial_number {
-            println!("  Serial: {}", serial);
+            println!("  Serial: {serial}");
         }
 
-        println!("  Interface: {}", device.interface_number);
+        println!("  Interface: {interface}", interface = device.interface_number);
         println!();
     }
 
@@ -48,9 +48,9 @@ fn main() -> Result<()> {
     if coldcards.is_empty() {
         println!("No Coldcard devices found.");
     } else {
-        println!("Found {} Coldcard device(s)!", coldcards.len());
+        println!("Found {count} Coldcard device(s)!", count = coldcards.len());
         for device in &coldcards {
-            println!("  - {}", device.path.display());
+            println!("  - {path}", path = device.path.display());
         }
     }
 

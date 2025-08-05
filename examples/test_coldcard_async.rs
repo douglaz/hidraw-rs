@@ -31,8 +31,8 @@ async fn main() -> Result<()> {
 
     let device_info = &devices[0];
     println!("Found Coldcard:");
-    println!("  Path: {}", device_info.path.display());
-    println!("  Product: {:?}", device_info.product);
+    println!("  Path: {path}", path = device_info.path.display());
+    println!("  Product: {product:?}", product = device_info.product);
 
     // Open the device asynchronously
     println!("\nOpening device asynchronously...");
@@ -49,8 +49,8 @@ async fn main() -> Result<()> {
     packet[5..5 + test_data.len()].copy_from_slice(test_data);
 
     match device.write(&packet).await {
-        Ok(n) => println!("Wrote {} bytes asynchronously", n),
-        Err(e) => println!("Async write error: {}", e),
+        Ok(n) => println!("Wrote {n} bytes asynchronously"),
+        Err(e) => println!("Async write error: {e}"),
     }
 
     // Test 2: Async read with timeout
@@ -62,17 +62,17 @@ async fn main() -> Result<()> {
         .await
     {
         Ok(n) => {
-            println!("Read {} bytes asynchronously", n);
+            println!("Read {n} bytes asynchronously");
             let len = (response[0] & 0x3F) as usize;
             if len > 0 && len < 64 {
                 println!(
-                    "Response: {:?}",
-                    String::from_utf8_lossy(&response[1..=len])
+                    "Response: {response:?}",
+                    response = String::from_utf8_lossy(&response[1..=len])
                 );
             }
         }
         Err(Error::Timeout) => println!("Async read timed out"),
-        Err(e) => println!("Async read error: {}", e),
+        Err(e) => println!("Async read error: {e}"),
     }
 
     // Test 3: Async write with timeout
@@ -86,8 +86,8 @@ async fn main() -> Result<()> {
         .write_timeout(&packet, Duration::from_millis(100))
         .await
     {
-        Ok(n) => println!("Wrote {} bytes with timeout", n),
-        Err(e) => println!("Write timeout error: {}", e),
+        Ok(n) => println!("Wrote {n} bytes with timeout"),
+        Err(e) => println!("Write timeout error: {e}"),
     }
 
     // Read version response
@@ -97,13 +97,13 @@ async fn main() -> Result<()> {
         .await
     {
         Ok(n) => {
-            println!("Read {} bytes", n);
+            println!("Read {n} bytes");
             let len = (response[0] & 0x3F) as usize;
             if len > 0 && len < 64 {
-                println!("Version: {}", String::from_utf8_lossy(&response[1..=len]));
+                println!("Version: {version}", version = String::from_utf8_lossy(&response[1..=len]));
             }
         }
-        Err(e) => println!("Read error: {}", e),
+        Err(e) => println!("Read error: {e}"),
     }
 
     // Test 4: Concurrent operations (demonstrate async capabilities)
@@ -115,10 +115,10 @@ async fn main() -> Result<()> {
     for i in 0..3 {
         let mut buf = vec![0u8; 64];
         let handle = tokio::spawn(async move {
-            println!("  Task {} starting...", i);
+            println!("  Task {i} starting...");
             // Simulate read that will timeout
             tokio::time::sleep(Duration::from_millis(50 * i as u64)).await;
-            println!("  Task {} completed", i);
+            println!("  Task {i} completed");
             i
         });
         handles.push(handle);
@@ -127,7 +127,7 @@ async fn main() -> Result<()> {
     // Wait for all tasks
     for handle in handles {
         let result = handle.await.unwrap();
-        println!("Task {} result collected", result);
+        println!("Task {result} result collected");
     }
 
     println!("\nAll async tests completed!");

@@ -9,14 +9,14 @@ fn main() {
     println!("Debugging sysfs path resolution for hidraw12");
     println!("============================================\n");
 
-    println!("Device path: {}", device_path.display());
-    println!("Is symlink: {}", device_path.is_symlink());
+    println!("Device path: {path}", path = device_path.display());
+    println!("Is symlink: {is_symlink}", is_symlink = device_path.is_symlink());
 
     if device_path.is_symlink() {
         match fs::read_link(device_path) {
             Ok(target) => {
-                println!("Symlink target: {}", target.display());
-                println!("Is relative: {}", target.is_relative());
+                println!("Symlink target: {target}", target = target.display());
+                println!("Is relative: {is_relative}", is_relative = target.is_relative());
 
                 // Resolve to absolute path
                 let absolute = if target.is_relative() {
@@ -25,16 +25,16 @@ fn main() {
                     target.clone()
                 };
 
-                println!("Absolute path: {}", absolute.display());
+                println!("Absolute path: {path}", path = absolute.display());
 
                 // Canonicalize the path to resolve .. components
                 let _canonical_path = match fs::canonicalize(&absolute) {
                     Ok(canonical) => {
-                        println!("Canonical path: {}", canonical.display());
+                        println!("Canonical path: {path}", path = canonical.display());
                         canonical
                     }
                     Err(e) => {
-                        println!("Failed to canonicalize: {}", e);
+                        println!("Failed to canonicalize: {e}");
                         absolute
                     }
                 };
@@ -42,25 +42,25 @@ fn main() {
                 // Also try going up from the canonical path of the device symlink itself
                 if let Ok(canonical_device) = fs::canonicalize(device_path) {
                     println!(
-                        "\nAlternative: canonical device path: {}",
-                        canonical_device.display()
+                        "\nAlternative: canonical device path: {path}",
+                        path = canonical_device.display()
                     );
 
                     // Walk up from here
                     let mut alt_current = canonical_device;
                     for i in 0..10 {
-                        println!("\nAlt Level {}: {}", i, alt_current.display());
+                        println!("\nAlt Level {i}: {path}", path = alt_current.display());
 
                         let vendor_path = alt_current.join("idVendor");
-                        println!("  Checking for idVendor: {}", vendor_path.exists());
+                        println!("  Checking for idVendor: {exists}", exists = vendor_path.exists());
 
                         if vendor_path.exists() {
                             println!("  FOUND! Reading vendor/product IDs...");
                             if let Ok(vendor) = fs::read_to_string(&vendor_path) {
-                                println!("  Vendor ID: {}", vendor.trim());
+                                println!("  Vendor ID: {vendor}", vendor = vendor.trim());
                             }
                             if let Ok(product) = fs::read_to_string(alt_current.join("idProduct")) {
-                                println!("  Product ID: {}", product.trim());
+                                println!("  Product ID: {product}", product = product.trim());
                             }
                             break;
                         }
@@ -75,7 +75,7 @@ fn main() {
                 }
             }
             Err(e) => {
-                println!("Error reading symlink: {}", e);
+                println!("Error reading symlink: {e}");
             }
         }
     }

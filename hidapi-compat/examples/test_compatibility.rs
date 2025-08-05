@@ -21,14 +21,14 @@ fn test_device_enumeration() -> Result<(), HidError> {
 
     // Test device_list iterator
     let count = api.device_list().count();
-    println!("✅ device_list() works - found {} devices", count);
+    println!("✅ device_list() works - found {count} devices");
 
     // Test deprecated devices() method
     #[allow(deprecated)]
     let devices = api.devices();
     println!(
-        "✅ devices() works (deprecated) - {} devices",
-        devices.len()
+        "✅ devices() works (deprecated) - {count} devices",
+        count = devices.len()
     );
 
     Ok(())
@@ -44,34 +44,34 @@ fn test_device_info() -> Result<(), HidError> {
         println!("✅ path() works");
 
         let _vid = device.vendor_id();
-        println!("✅ vendor_id() works: {:04x}", device.vendor_id());
+        println!("✅ vendor_id() works: {vid:04x}", vid = device.vendor_id());
 
         let _pid = device.product_id();
-        println!("✅ product_id() works: {:04x}", device.product_id());
+        println!("✅ product_id() works: {pid:04x}", pid = device.product_id());
 
         let _serial = device.serial_number();
-        println!("✅ serial_number() works: {:?}", device.serial_number());
+        println!("✅ serial_number() works: {serial:?}", serial = device.serial_number());
 
         let _release = device.release_number();
-        println!("✅ release_number() works: {}", device.release_number());
+        println!("✅ release_number() works: {release}", release = device.release_number());
 
         let _manufacturer = device.manufacturer_string();
         println!(
-            "✅ manufacturer_string() works: {:?}",
-            device.manufacturer_string()
+            "✅ manufacturer_string() works: {manufacturer:?}",
+            manufacturer = device.manufacturer_string()
         );
 
         let _product = device.product_string();
-        println!("✅ product_string() works: {:?}", device.product_string());
+        println!("✅ product_string() works: {product:?}", product = device.product_string());
 
         let _usage_page = device.usage_page();
-        println!("✅ usage_page() works: {}", device.usage_page());
+        println!("✅ usage_page() works: {usage_page}", usage_page = device.usage_page());
 
         let _usage = device.usage();
-        println!("✅ usage() works: {}", device.usage());
+        println!("✅ usage() works: {usage}", usage = device.usage());
 
         let _interface = device.interface_number();
-        println!("✅ interface_number() works: {}", device.interface_number());
+        println!("✅ interface_number() works: {interface}", interface = device.interface_number());
     } else {
         println!("⚠️  No devices found to test DeviceInfo");
     }
@@ -94,15 +94,15 @@ fn test_device_operations() -> Result<(), HidError> {
             // Test write
             let data = vec![0x00, 0x01, 0x02, 0x03];
             match device.write(&data) {
-                Ok(n) => println!("✅ write() works - wrote {} bytes", n),
-                Err(e) => println!("⚠️  write() error: {:?}", e),
+                Ok(n) => println!("✅ write() works - wrote {n} bytes"),
+                Err(e) => println!("⚠️  write() error: {e:?}"),
             }
 
             // Test read with timeout
             let mut buf = vec![0u8; 64];
             match device.read_timeout(&mut buf, 100) {
-                Ok(n) => println!("✅ read_timeout() works - read {} bytes", n),
-                Err(e) => println!("⚠️  read_timeout() error: {:?}", e),
+                Ok(n) => println!("✅ read_timeout() works - read {n} bytes"),
+                Err(e) => println!("⚠️  read_timeout() error: {e:?}"),
             }
 
             // Test blocking mode
@@ -111,19 +111,19 @@ fn test_device_operations() -> Result<(), HidError> {
 
             // Test read in non-blocking mode
             match device.read(&mut buf) {
-                Ok(n) => println!("✅ read() works - read {} bytes", n),
-                Err(e) => println!("⚠️  read() error: {:?}", e),
+                Ok(n) => println!("✅ read() works - read {n} bytes"),
+                Err(e) => println!("⚠️  read() error: {e:?}"),
             }
 
             // Test feature reports
             match device.send_feature_report(&[0x00, 0x01]) {
                 Ok(()) => println!("✅ send_feature_report() works"),
-                Err(e) => println!("⚠️  send_feature_report() error: {:?}", e),
+                Err(e) => println!("⚠️  send_feature_report() error: {e:?}"),
             }
 
             match device.get_feature_report(&mut buf) {
-                Ok(n) => println!("✅ get_feature_report() works - {} bytes", n),
-                Err(e) => println!("⚠️  get_feature_report() error: {:?}", e),
+                Ok(n) => println!("✅ get_feature_report() works - {n} bytes"),
+                Err(e) => println!("⚠️  get_feature_report() error: {e:?}"),
             }
 
             // Test device info methods
@@ -141,8 +141,7 @@ fn test_device_operations() -> Result<(), HidError> {
         }
         Err(_) => {
             println!(
-                "⚠️  No test device found (VID:{:04x} PID:{:04x})",
-                TEST_VID, TEST_PID
+                "⚠️  No test device found (VID:{TEST_VID:04x} PID:{TEST_PID:04x})"
             );
             println!("    Device operations tests skipped");
         }
@@ -187,19 +186,19 @@ fn main() {
 
     // Run all tests
     if let Err(e) = test_api_creation() {
-        eprintln!("❌ API creation failed: {:?}", e);
+        eprintln!("❌ API creation failed: {e:?}");
     }
 
     if let Err(e) = test_device_enumeration() {
-        eprintln!("❌ Device enumeration failed: {:?}", e);
+        eprintln!("❌ Device enumeration failed: {e:?}");
     }
 
     if let Err(e) = test_device_info() {
-        eprintln!("❌ Device info failed: {:?}", e);
+        eprintln!("❌ Device info failed: {e:?}");
     }
 
     if let Err(e) = test_device_operations() {
-        eprintln!("❌ Device operations failed: {:?}", e);
+        eprintln!("❌ Device operations failed: {e:?}");
     }
 
     test_error_types();
