@@ -4,7 +4,7 @@
 
 use crate::hidraw::{sys, HidrawDevice};
 use crate::{DeviceInfo, Error, Result};
-use std::os::unix::io::{AsRawFd, FromRawFd};
+use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd};
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 use tokio::fs::File;
@@ -24,14 +24,11 @@ impl AsyncHidrawDevice {
         let sync_device = HidrawDevice::open(path)?;
 
         // Extract the file descriptor and convert to tokio File
-        let raw_fd = sync_device.as_raw_fd();
+        // Duplicate the fd to avoid closing it when sync_device is dropped
+        let new_fd = rustix::io::dup(&sync_device).map_err(|e| Error::Io(e.into()))?;
         let file = unsafe {
-            // Duplicate the fd to avoid closing it when sync_device is dropped
-            let new_fd = libc::dup(raw_fd);
-            if new_fd < 0 {
-                return Err(Error::Io(std::io::Error::last_os_error()));
-            }
-            File::from_raw_fd(new_fd)
+            // Still need unsafe to convert OwnedFd to tokio File
+            File::from_raw_fd(new_fd.into_raw_fd())
         };
 
         Ok(Self {
@@ -98,14 +95,9 @@ impl AsyncHidrawDevice {
         // First byte must be the report ID
         buf[0] = report_id;
 
-        unsafe {
-            let res = crate::hidraw::ioctl::ioctl_read_buf(
-                self.file.as_raw_fd(),
-                sys::hidiocgfeature(buf.len()),
-                buf,
-            )?;
-            Ok(res)
-        }
+        let res =
+            crate::hidraw::ioctl::ioctl_read_buf(&self.file, sys::hidiocgfeature(buf.len()), buf)?;
+        Ok(res)
     }
 
     /// Send a feature report (synchronous - ioctl doesn't have async variant)
@@ -114,13 +106,7 @@ impl AsyncHidrawDevice {
             return Err(Error::InvalidParameter("Data cannot be empty".to_string()));
         }
 
-        unsafe {
-            crate::hidraw::ioctl::ioctl_write_buf(
-                self.file.as_raw_fd(),
-                sys::hidiocsfeature(data.len()),
-                data,
-            )?;
-        }
+        crate::hidraw::ioctl::ioctl_write_buf(&self.file, sys::hidiocsfeature(data.len()), data)?;
         Ok(())
     }
 }

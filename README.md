@@ -7,9 +7,9 @@ A Rust HID library for Linux using the hidraw kernel interface. Provides direct 
 
 ## Features
 
-- 🦀 **Rust implementation** with minimal dependencies (only libc for system calls)
+- 🦀 **Rust implementation** with minimal dependencies (libc + rustix for safer system calls)
 - 🐧 **Direct hidraw kernel interface** - no udev or libusb needed
-- 🔒 **Memory safe** - no buffer overflows or unsafe memory access
+- 🔒 **Memory safe** - minimal unsafe code using rustix for safe system call wrappers
 - 📦 **Static linking support** - works perfectly with musl for standalone binaries
 - ⚡ **Async I/O support** - optional tokio integration for async operations
 - ⏱️ **Comprehensive timeout support** - for both reads and writes
@@ -221,7 +221,11 @@ All operations return `Result<T, Error>` with comprehensive error types:
 
 This library prioritizes safety:
 
-- All unsafe operations are contained in small, audited functions
+- **Minimal unsafe code**: Uses `rustix` crate for safe wrappers around system calls
+- **Safe abstractions**: Poll operations use rustix's safe `poll()` wrapper
+- **Safe file descriptor handling**: File descriptor duplication uses rustix's `dup()` 
+- **Reduced attack surface**: Unsafe code is limited to essential ioctl operations
+- **Type safety**: Uses Rust's type system and rustix's `AsFd` trait for I/O safety
 - Buffer sizes are validated
 - Integer overflows in timeout calculations are prevented
 - Connection state is properly tracked
