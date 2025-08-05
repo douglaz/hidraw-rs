@@ -93,14 +93,11 @@ async fn main() -> Result<()> {
 
     match device.get_feature_report(0x01, &mut feature_buf) {
         Ok(n) => {
-            println!("Got feature report, {} bytes:", n);
+            println!("Got feature report, {n} bytes:");
             println!("Data: {:02x?}", &feature_buf[..n]);
         }
         Err(e) => {
-            println!(
-                "Get feature report failed: {} (this is normal for many devices)",
-                e
-            );
+            println!("Get feature report failed: {e} (this is normal for many devices)");
         }
     }
 
@@ -110,10 +107,7 @@ async fn main() -> Result<()> {
 
     match device.send_feature_report(&feature_data) {
         Ok(()) => println!("Feature report sent successfully"),
-        Err(e) => println!(
-            "Send feature report failed: {} (this is normal for many devices)",
-            e
-        ),
+        Err(e) => println!("Send feature report failed: {e} (this is normal for many devices)"),
     }
 
     println!("\nAsync HID example completed!");

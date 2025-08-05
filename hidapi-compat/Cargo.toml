@@ -27,3 +27,6 @@ default = []
 linux-static-hidraw = []
 # Feature flag to match hidapi's linux-static-libusb
 linux-static-libusb = []
+
+[lints]
+workspace = true

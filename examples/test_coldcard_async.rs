@@ -116,7 +116,6 @@ async fn main() -> Result<()> {
 
     // Spawn 3 async read operations that will timeout
     for i in 0..3 {
-        let mut buf = vec![0u8; 64];
         let handle = tokio::spawn(async move {
             println!("  Task {i} starting...");
             // Simulate read that will timeout

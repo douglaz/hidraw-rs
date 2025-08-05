@@ -43,3 +43,13 @@ path = "examples/coldcard_ping.rs"
 
 [workspace]
 members = [".", "hidapi-compat"]
+
+# Workspace-wide lints to ensure consistent code quality
+[workspace.lints.clippy]
+# Deny all warnings in CI
+all = "warn"
+# Additional lints that stable Rust would warn about
+uninlined_format_args = "warn"
+
+[lints]
+workspace = true

@@ -4,7 +4,7 @@ use hidraw_rs::prelude::*;
 use hidraw_rs::protocol::{frame_packets, unframe_packets};
 
 #[cfg(feature = "async")]
-use hidraw_rs::async_io::{AsyncHidDevice, AsyncHidrawDevice};
+use hidraw_rs::async_io::AsyncHidDevice;
 
 #[test]
 fn test_library_imports() {
@@ -90,7 +90,7 @@ async fn test_async_timeout() {
                 match result {
                     Ok(_) => {}               // Device responded very quickly
                     Err(Error::Timeout) => {} // Expected timeout
-                    Err(e) => panic!("Unexpected error: {:?}", e),
+                    Err(e) => panic!("Unexpected error: {e:?}"),
                 }
             }
         }
