@@ -4,7 +4,7 @@
 
 use crate::hidraw::{sys, HidrawDevice};
 use crate::{DeviceInfo, Error, Result};
-use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd};
+use std::os::unix::io::AsRawFd;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 use tokio::fs::File;
@@ -26,10 +26,11 @@ impl AsyncHidrawDevice {
         // Extract the file descriptor and convert to tokio File
         // Duplicate the fd to avoid closing it when sync_device is dropped
         let new_fd = rustix::io::dup(&sync_device).map_err(|e| Error::Io(e.into()))?;
-        let file = unsafe {
-            // Still need unsafe to convert OwnedFd to tokio File
-            File::from_raw_fd(new_fd.into_raw_fd())
-        };
+
+        // Convert OwnedFd to std::fs::File first, then to tokio::fs::File
+        // This avoids the need for unsafe FromRawFd
+        let std_file = std::fs::File::from(new_fd);
+        let file = File::from_std(std_file);
 
         Ok(Self {
             file,
