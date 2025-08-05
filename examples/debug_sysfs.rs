@@ -28,7 +28,7 @@ fn main() {
                 println!("Absolute path: {}", absolute.display());
 
                 // Canonicalize the path to resolve .. components
-                let canonical_path = match fs::canonicalize(&absolute) {
+                let _canonical_path = match fs::canonicalize(&absolute) {
                     Ok(canonical) => {
                         println!("Canonical path: {}", canonical.display());
                         canonical
