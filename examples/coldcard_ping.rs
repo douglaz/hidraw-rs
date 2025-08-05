@@ -18,7 +18,7 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
-    println!("Found {} Coldcard device(s)", devices.len());
+    println!("Found {count} Coldcard device(s)", count = devices.len());
 
     // Open the first Coldcard
     println!("\nOpening Coldcard...");
@@ -27,19 +27,19 @@ fn main() -> Result<()> {
     // Display device info
     let info = coldcard.info();
     println!("Device info:");
-    println!("  Path: {}", info.path.display());
+    println!("  Path: {path}", path = info.path.display());
     if let Some(product) = &info.product {
-        println!("  Product: {}", product);
+        println!("  Product: {product}");
     }
     if let Some(serial) = &info.serial_number {
-        println!("  Serial: {}", serial);
+        println!("  Serial: {serial}");
     }
 
     // Get version
     println!("\nGetting version...");
     match coldcard.get_version() {
-        Ok(version) => println!("Version: {}", version),
-        Err(e) => eprintln!("Failed to get version: {}", e),
+        Ok(version) => println!("Version: {version}"),
+        Err(e) => eprintln!("Failed to get version: {e}"),
     }
 
     // Send ping
@@ -47,10 +47,13 @@ fn main() -> Result<()> {
     let ping_msg = b"Hello from pure-rust-hid!";
     match coldcard.ping(ping_msg) {
         Ok(response) => {
-            println!("Ping response: {:?}", String::from_utf8_lossy(&response));
+            println!(
+                "Ping response: {response:?}",
+                response = String::from_utf8_lossy(&response)
+            );
         }
         Err(e) => {
-            eprintln!("Ping failed: {}", e);
+            eprintln!("Ping failed: {e}");
         }
     }
 
@@ -58,18 +61,18 @@ fn main() -> Result<()> {
     println!("\nGetting status...");
     match coldcard.get_status() {
         Ok(status) => {
-            println!("Status received, {} bytes", status.len());
+            println!("Status received, {bytes} bytes", bytes = status.len());
             if !status.is_empty() {
                 // Try to parse as text first
                 if let Ok(text) = String::from_utf8(status.clone()) {
-                    println!("Status: {}", text);
+                    println!("Status: {text}");
                 } else {
-                    println!("Status (hex): {:02x?}", status);
+                    println!("Status (hex): {status:02x?}");
                 }
             }
         }
         Err(e) => {
-            eprintln!("Failed to get status: {}", e);
+            eprintln!("Failed to get status: {e}");
         }
     }
 

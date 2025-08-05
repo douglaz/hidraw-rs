@@ -9,7 +9,7 @@ fn main() {
 
     // Check /sys/class/hidraw
     let hidraw_class = Path::new("/sys/class/hidraw");
-    println!("Checking {}", hidraw_class.display());
+    println!("Checking {path}", path = hidraw_class.display());
 
     if !hidraw_class.exists() {
         eprintln!("ERROR: /sys/class/hidraw does not exist!");
@@ -23,9 +23,9 @@ fn main() {
                 let name = entry.file_name();
                 let device_path = Path::new("/dev").join(&name);
 
-                println!("\nFound: {}", name.to_string_lossy());
-                println!("  Device path: {}", device_path.display());
-                println!("  Exists: {}", device_path.exists());
+                println!("\nFound: {name}", name = name.to_string_lossy());
+                println!("  Device path: {path}", path = device_path.display());
+                println!("  Exists: {exists}", exists = device_path.exists());
 
                 // Check permissions
                 if let Ok(metadata) = fs::metadata(&device_path) {
@@ -36,7 +36,7 @@ fn main() {
                     // Check if we can open it
                     match fs::File::open(&device_path) {
                         Ok(_) => println!("  Can open: YES"),
-                        Err(e) => println!("  Can open: NO ({})", e),
+                        Err(e) => println!("  Can open: NO ({e})"),
                     }
                 }
 
@@ -46,24 +46,24 @@ fn main() {
                     println!("  Device info:");
                     for line in uevent.lines() {
                         if line.starts_with("HID_NAME=") || line.starts_with("HID_ID=") {
-                            println!("    {}", line);
+                            println!("    {line}");
                         }
                     }
                 }
             }
         }
         Err(e) => {
-            eprintln!("ERROR reading /sys/class/hidraw: {}", e);
+            eprintln!("ERROR reading /sys/class/hidraw: {e}");
         }
     }
 
     println!("\n\nNow trying hidraw-rs enumeration...");
     match hidraw_rs::enumerate() {
         Ok(devices) => {
-            println!("Found {} devices", devices.len());
+            println!("Found {count} devices", count = devices.len());
             for device in devices {
-                println!("\nDevice: {}", device.display_name());
-                println!("  Path: {}", device.path.display());
+                println!("\nDevice: {name}", name = device.display_name());
+                println!("  Path: {path}", path = device.path.display());
                 println!(
                     "  VID:PID: {:04x}:{:04x}",
                     device.vendor_id, device.product_id
@@ -71,7 +71,7 @@ fn main() {
             }
         }
         Err(e) => {
-            eprintln!("Enumeration failed: {}", e);
+            eprintln!("Enumeration failed: {e}");
         }
     }
 
@@ -86,7 +86,7 @@ fn main() {
             println!("  Serial: {:?}", info.serial_number);
         }
         Err(e) => {
-            eprintln!("Failed to get device info: {}", e);
+            eprintln!("Failed to get device info: {e}");
         }
     }
 }

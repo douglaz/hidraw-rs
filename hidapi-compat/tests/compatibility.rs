@@ -10,10 +10,10 @@ fn test_api_creation() {
             println!("HidApi created successfully");
             // Test device enumeration
             let devices: Vec<_> = api.device_list().collect();
-            println!("Found {} devices", devices.len());
+            println!("Found {count} devices", count = devices.len());
         }
         Err(e) => {
-            println!("Failed to create HidApi: {:?}", e);
+            println!("Failed to create HidApi: {e:?}");
             // This is expected in CI environments without HID devices
         }
     }
@@ -47,9 +47,9 @@ fn test_device_info() {
                 let _interface = device.interface_number();
 
                 println!(
-                    "Device: VID={:04x} PID={:04x}",
-                    device.vendor_id(),
-                    device.product_id()
+                    "Device: VID={vid:04x} PID={pid:04x}",
+                    vid = device.vendor_id(),
+                    pid = device.product_id()
                 );
             }
         }

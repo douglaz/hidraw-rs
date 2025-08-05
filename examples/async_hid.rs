@@ -31,15 +31,18 @@ async fn main() -> Result<()> {
         return Ok(());
     }
 
-    println!("Found {} HID device(s):", devices.len());
+    println!("Found {count} HID device(s):", count = devices.len());
     for (i, device) in devices.iter().enumerate() {
-        println!("  [{}] {}", i, device.display_name());
-        println!("      Path: {}", device.path.display());
+        println!("  [{i}] {name}", name = device.display_name());
+        println!("      Path: {path}", path = device.path.display());
     }
 
     // Use the first device
     let device_info = &devices[0];
-    println!("\nOpening device: {}", device_info.display_name());
+    println!(
+        "\nOpening device: {name}",
+        name = device_info.display_name()
+    );
 
     // Open the device asynchronously
     let mut device = AsyncHidDevice::open(device_info).await?;
@@ -53,9 +56,9 @@ async fn main() -> Result<()> {
         .write_timeout(&test_data, Duration::from_millis(500))
         .await
     {
-        Ok(n) => println!("Wrote {} bytes", n),
+        Ok(n) => println!("Wrote {n} bytes"),
         Err(Error::Timeout) => println!("Write timed out"),
-        Err(e) => eprintln!("Write failed: {}", e),
+        Err(e) => eprintln!("Write failed: {e}"),
     }
 
     // Example: Read with short timeout
@@ -67,14 +70,14 @@ async fn main() -> Result<()> {
         .await
     {
         Ok(n) => {
-            println!("Read {} bytes:", n);
+            println!("Read {n} bytes:");
             println!("Data: {:02x?}", &buffer[..n]);
         }
         Err(Error::Timeout) => {
             println!("Read timed out (expected for most devices without continuous input)");
         }
         Err(e) => {
-            eprintln!("Read failed: {}", e);
+            eprintln!("Read failed: {e}");
         }
     }
 

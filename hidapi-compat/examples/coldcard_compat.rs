@@ -23,21 +23,27 @@ fn main() -> HidResult<()> {
         .filter(|dev| dev.vendor_id() == COINKITE_VID && dev.product_id() == CKCC_PID)
         .collect();
 
-    println!("\nFound {} Coldcard device(s)", coldcards.len());
+    println!(
+        "\nFound {count} Coldcard device(s)",
+        count = coldcards.len()
+    );
 
     // Print device info like rust-coldcard does
     for (i, device) in coldcards.iter().enumerate() {
-        println!("\nColdcard #{}:", i + 1);
-        println!("  Path: {:?}", device.path());
-        println!("  Serial: {:?}", device.serial_number());
-        println!("  Manufacturer: {:?}", device.manufacturer_string());
-        println!("  Product: {:?}", device.product_string());
+        println!("\nColdcard #{number}:", number = i + 1);
+        println!("  Path: {path:?}", path = device.path());
+        println!("  Serial: {serial:?}", serial = device.serial_number());
+        println!(
+            "  Manufacturer: {manufacturer:?}",
+            manufacturer = device.manufacturer_string()
+        );
+        println!("  Product: {product:?}", product = device.product_string());
     }
 
     // Try to open a device by serial (like rust-coldcard)
     if let Some(first_device) = coldcards.first() {
         if let Some(serial) = first_device.serial_number() {
-            println!("\nTrying to open device with serial: {}", serial);
+            println!("\nTrying to open device with serial: {serial}");
 
             match api.open_serial(COINKITE_VID, CKCC_PID, serial) {
                 Ok(mut device) => {
@@ -46,19 +52,19 @@ fn main() -> HidResult<()> {
                     // Test write operation (ping-like)
                     let ping_data = vec![0x00, b'p', b'i', b'n', b'g'];
                     match device.write(&ping_data) {
-                        Ok(n) => println!("✓ Wrote {} bytes", n),
-                        Err(e) => println!("✗ Write failed: {:?}", e),
+                        Ok(n) => println!("✓ Wrote {n} bytes"),
+                        Err(e) => println!("✗ Write failed: {e:?}"),
                     }
 
                     // Test read with timeout
                     let mut buf = vec![0u8; 64];
                     match device.read_timeout(&mut buf, 100) {
-                        Ok(n) => println!("✓ Read {} bytes", n),
-                        Err(e) => println!("✗ Read failed: {:?}", e),
+                        Ok(n) => println!("✓ Read {n} bytes"),
+                        Err(e) => println!("✗ Read failed: {e:?}"),
                     }
                 }
                 Err(e) => {
-                    println!("✗ Failed to open device: {:?}", e);
+                    println!("✗ Failed to open device: {e:?}");
                 }
             }
         }
