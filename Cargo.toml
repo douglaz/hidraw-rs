@@ -1,0 +1,43 @@
+[package]
+name = "hidraw-rs"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+license = "MIT OR Apache-2.0"
+description = "Rust library for Linux hidraw interface with minimal dependencies"
+repository = "https://github.com/yourusername/hidraw-rs"
+keywords = ["hid", "usb", "hidraw", "hardware", "coldcard"]
+categories = ["hardware-support", "os::linux-apis"]
+
+[dependencies]
+libc = "0.2"
+thiserror = "1.0"
+
+# Optional dependencies
+tokio = { version = "1.40", features = ["fs", "io-util", "time"], optional = true }
+tracing = { version = "0.1", optional = true }
+serde = { version = "1.0", features = ["derive"], optional = true }
+
+[dev-dependencies]
+tokio = { version = "1.40", features = ["full"] }
+tracing-subscriber = "0.3"
+
+[features]
+default = []
+async = ["tokio"]
+logging = ["tracing"]
+serialization = ["serde"]
+
+[[example]]
+name = "list_devices"
+path = "examples/list_devices.rs"
+
+[[example]]
+name = "basic_hid"
+path = "examples/basic_hid.rs"
+
+[[example]]
+name = "coldcard_ping"
+path = "examples/coldcard_ping.rs"
+
+[workspace]

@@ -1,0 +1,12 @@
+//! Linux hidraw backend implementation
+
+mod device;
+mod enumerate;
+pub(crate) mod ioctl;
+pub(crate) mod sys;
+
+pub use device::HidrawDevice;
+pub use enumerate::{enumerate, get_device_info};
+
+// Re-export system constants that might be useful
+pub use sys::{HIDIOCGRDESCSIZE, HIDIOCGRDESC};
