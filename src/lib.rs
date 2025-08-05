@@ -43,7 +43,6 @@ pub mod async_io;
 
 pub mod coldcard;
 
-
 // Re-exports for convenience
 pub use device::{DeviceInfo, HidDevice};
 pub use error::{Error, Result};
