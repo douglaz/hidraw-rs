@@ -32,9 +32,51 @@ let ret = unsafe { libc::ioctl(fd_raw, request as libc::c_ulong, &mut value) };
 
 ## Alternatives Considered
 
-1. **rustix ioctl module**: Not available in rustix 0.38
-2. **nix crate**: Would add another dependency with similar unsafe usage internally
-3. **iocuddle crate**: Additional dependency that still uses unsafe internally
+### 1. rustix ioctl module
+Not available in rustix 0.38. The rustix crate focuses on providing safe wrappers for POSIX APIs but doesn't include ioctl functionality in the version we're using.
+
+### 2. nix crate
+The nix crate was thoroughly evaluated as an alternative. However, it would **not** eliminate unsafe code:
+
+**Key findings**:
+- All nix ioctl functions are marked `unsafe` and require unsafe blocks to call
+- The nix documentation states: "These generate public unsafe functions that can then be used for calling the ioctl"
+- Our use case requires runtime-computed ioctl values (for variable-sized buffers), which nix doesn't handle well
+- We would need workarounds like pre-generating macros for common sizes or falling back to `libc::ioctl`
+
+**Example comparison**:
+```rust
+// Current implementation (direct libc)
+pub fn ioctl_read_int<Fd: AsFd>(fd: Fd, request: u32) -> Result<i32> {
+    let mut value: i32 = 0;
+    let ret = unsafe { libc::ioctl(fd_raw, request as libc::c_ulong, &mut value) };
+    // ... error handling
+}
+
+// With nix crate - still requires unsafe!
+ioctl_read!(hidiocgrdescsize, b'H', 0x01, i32);
+pub fn get_desc_size(fd: RawFd) -> Result<i32> {
+    let mut size = 0;
+    unsafe { hidiocgrdescsize(fd, &mut size)? };  // Still unsafe!
+    Ok(size)
+}
+```
+
+**Runtime ioctl problem**:
+```rust
+// Our current code - request computed at runtime based on buffer size
+pub fn hidiocgfeature(len: usize) -> u32 {
+    _iowr(HID_TYPE, 0x06, len as u32)
+}
+
+// With nix - doesn't support runtime-computed sizes well
+// Would need a macro for each possible size or use unsafe libc::ioctl anyway
+```
+
+**Conclusion**: Using nix would add a dependency while providing no safety benefits for our use case.
+
+### 3. iocuddle crate
+Additional dependency that still uses unsafe internally. Designed for more complex ioctl scenarios but doesn't eliminate the fundamental need for unsafe code when interacting with the kernel.
 
 ## Conclusion
 
