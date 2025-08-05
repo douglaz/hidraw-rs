@@ -2,6 +2,7 @@
 
 use crate::hidraw::{ioctl, sys};
 use crate::{Error, Result};
+use rustix::fd::AsFd;
 use std::fs::File;
 use std::io::{Read, Write};
 use std::os::unix::fs::FileTypeExt;
@@ -44,8 +45,7 @@ impl HidrawDevice {
             })?;
 
         // Get report descriptor size via ioctl
-        let report_size =
-            unsafe { ioctl::ioctl_read_int(file.as_raw_fd(), sys::HIDIOCGRDESCSIZE)? as usize };
+        let report_size = ioctl::ioctl_read_int(&file, sys::HIDIOCGRDESCSIZE)? as usize;
 
         Ok(Self {
             file,
@@ -110,11 +110,8 @@ impl HidrawDevice {
         // First byte must be the report ID
         buf[0] = report_id;
 
-        unsafe {
-            let res =
-                ioctl::ioctl_read_buf(self.file.as_raw_fd(), sys::hidiocgfeature(buf.len()), buf)?;
-            Ok(res)
-        }
+        let res = ioctl::ioctl_read_buf(&self.file, sys::hidiocgfeature(buf.len()), buf)?;
+        Ok(res)
     }
 
     /// Send a feature report
@@ -123,9 +120,7 @@ impl HidrawDevice {
             return Err(Error::InvalidParameter("Data cannot be empty".to_string()));
         }
 
-        unsafe {
-            ioctl::ioctl_write_buf(self.file.as_raw_fd(), sys::hidiocsfeature(data.len()), data)?;
-        }
+        ioctl::ioctl_write_buf(&self.file, sys::hidiocsfeature(data.len()), data)?;
         Ok(())
     }
 
@@ -137,9 +132,7 @@ impl HidrawDevice {
             product: 0,
         };
 
-        unsafe {
-            ioctl::ioctl_read(self.file.as_raw_fd(), sys::HIDIOCGRAWINFO, &mut info)?;
-        }
+        ioctl::ioctl_read(&self.file, sys::HIDIOCGRAWINFO, &mut info)?;
 
         Ok(info)
     }
@@ -148,15 +141,13 @@ impl HidrawDevice {
     pub fn get_raw_name(&self) -> Result<String> {
         let mut buf = vec![0u8; 256];
 
-        unsafe {
-            let len = ioctl::ioctl_read_buf(self.file.as_raw_fd(), sys::HIDIOCGRAWNAME, &mut buf)?;
+        let len = ioctl::ioctl_read_buf(&self.file, sys::HIDIOCGRAWNAME, &mut buf)?;
 
-            // Truncate at null terminator or actual length
-            if let Some(null_pos) = buf.iter().position(|&b| b == 0) {
-                buf.truncate(null_pos);
-            } else {
-                buf.truncate(len);
-            }
+        // Truncate at null terminator or actual length
+        if let Some(null_pos) = buf.iter().position(|&b| b == 0) {
+            buf.truncate(null_pos);
+        } else {
+            buf.truncate(len);
         }
 
         String::from_utf8(buf).map_err(|_| Error::Parse("Invalid UTF-8 in device name".to_string()))
@@ -166,6 +157,12 @@ impl HidrawDevice {
 impl AsRawFd for HidrawDevice {
     fn as_raw_fd(&self) -> RawFd {
         self.file.as_raw_fd()
+    }
+}
+
+impl AsFd for HidrawDevice {
+    fn as_fd(&self) -> rustix::fd::BorrowedFd<'_> {
+        self.file.as_fd()
     }
 }
 

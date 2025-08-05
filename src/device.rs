@@ -140,7 +140,7 @@ impl HidDevice {
 
     /// Internal implementation of read with timeout
     fn read_timeout_impl(&mut self, buf: &mut [u8], timeout: Duration) -> Result<usize> {
-        use std::os::unix::io::AsRawFd;
+        use rustix::event::{poll, PollFd, PollFlags};
 
         if buf.is_empty() {
             return Err(Error::InvalidParameter(
@@ -151,26 +151,21 @@ impl HidDevice {
         // Convert timeout to milliseconds, capping at i32::MAX
         let timeout_ms = timeout.as_millis().min(i32::MAX as u128) as i32;
 
-        // Use poll() for timeout
-        let mut pollfd = libc::pollfd {
-            fd: self.raw.as_raw_fd(),
-            events: libc::POLLIN,
-            revents: 0,
-        };
+        // Use rustix's safe poll wrapper
+        let mut fds = [PollFd::new(&self.raw, PollFlags::IN)];
 
-        let ret = unsafe { libc::poll(&mut pollfd, 1, timeout_ms) };
+        let n = poll(&mut fds, timeout_ms).map_err(|e| Error::Io(e.into()))?;
 
-        if ret < 0 {
-            return Err(Error::Io(std::io::Error::last_os_error()));
-        } else if ret == 0 {
+        if n == 0 {
             return Err(Error::Timeout);
         }
 
         // Check for error conditions
-        if pollfd.revents & libc::POLLERR != 0 {
+        let revents = fds[0].revents();
+        if revents.contains(PollFlags::ERR) {
             return Err(Error::io_error("Poll error on device"));
         }
-        if pollfd.revents & libc::POLLHUP != 0 {
+        if revents.contains(PollFlags::HUP) {
             return Err(Error::Disconnected);
         }
 
@@ -179,31 +174,26 @@ impl HidDevice {
 
     /// Internal implementation of write with timeout
     fn write_timeout_impl(&mut self, data: &[u8], timeout: Duration) -> Result<usize> {
-        use std::os::unix::io::AsRawFd;
+        use rustix::event::{poll, PollFd, PollFlags};
 
         // Convert timeout to milliseconds, capping at i32::MAX
         let timeout_ms = timeout.as_millis().min(i32::MAX as u128) as i32;
 
-        // Use poll() for timeout
-        let mut pollfd = libc::pollfd {
-            fd: self.raw.as_raw_fd(),
-            events: libc::POLLOUT,
-            revents: 0,
-        };
+        // Use rustix's safe poll wrapper
+        let mut fds = [PollFd::new(&self.raw, PollFlags::OUT)];
 
-        let ret = unsafe { libc::poll(&mut pollfd, 1, timeout_ms) };
+        let n = poll(&mut fds, timeout_ms).map_err(|e| Error::Io(e.into()))?;
 
-        if ret < 0 {
-            return Err(Error::Io(std::io::Error::last_os_error()));
-        } else if ret == 0 {
+        if n == 0 {
             return Err(Error::Timeout);
         }
 
         // Check for error conditions
-        if pollfd.revents & libc::POLLERR != 0 {
+        let revents = fds[0].revents();
+        if revents.contains(PollFlags::ERR) {
             return Err(Error::io_error("Poll error on device"));
         }
-        if pollfd.revents & libc::POLLHUP != 0 {
+        if revents.contains(PollFlags::HUP) {
             return Err(Error::Disconnected);
         }
 
