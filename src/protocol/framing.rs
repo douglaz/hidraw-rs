@@ -3,6 +3,7 @@
 use crate::{Error, Result};
 
 /// Default HID packet size (64 bytes is common for USB HID)
+#[allow(dead_code)]
 pub const DEFAULT_PACKET_SIZE: usize = 64;
 
 /// Frame data into HID packets

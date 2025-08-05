@@ -43,9 +43,6 @@ pub mod async_io;
 
 pub mod coldcard;
 
-#[cfg(feature = "hidapi-compat")]
-pub mod hidapi_compat;
-
 // Re-exports for convenience
 pub use device::{DeviceInfo, HidDevice};
 pub use error::{Error, Result};

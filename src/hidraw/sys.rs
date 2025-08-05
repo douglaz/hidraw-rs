@@ -4,6 +4,7 @@
 const IOC_NRBITS: u32 = 8;
 const IOC_TYPEBITS: u32 = 8;
 const IOC_SIZEBITS: u32 = 14;
+#[allow(dead_code)]
 const IOC_DIRBITS: u32 = 2;
 
 const IOC_NRSHIFT: u32 = 0;
@@ -11,6 +12,7 @@ const IOC_TYPESHIFT: u32 = IOC_NRSHIFT + IOC_NRBITS;
 const IOC_SIZESHIFT: u32 = IOC_TYPESHIFT + IOC_TYPEBITS;
 const IOC_DIRSHIFT: u32 = IOC_SIZESHIFT + IOC_SIZEBITS;
 
+#[allow(dead_code)]
 const IOC_NONE: u32 = 0;
 const IOC_WRITE: u32 = 1;
 const IOC_READ: u32 = 2;
@@ -51,6 +53,7 @@ pub const HIDIOCGRAWINFO: u32 = _ior(HID_TYPE, 0x03, 8);
 pub const HIDIOCGRAWNAME: u32 = _ior(HID_TYPE, 0x04, 256);
 
 /// Get raw physical info
+#[allow(dead_code)]
 pub const HIDIOCGRAWPHYS: u32 = _ior(HID_TYPE, 0x05, 256);
 
 /// Send feature report
@@ -64,6 +67,7 @@ pub fn hidiocsfeature(len: usize) -> u32 {
 }
 
 /// Get raw unique ID
+#[allow(dead_code)]
 pub const HIDIOCGRAWUNIQ: u32 = _ior(HID_TYPE, 0x08, 256);
 
 /// Raw device info structure
@@ -76,6 +80,7 @@ pub struct HidrawDevInfo {
 
 /// Report descriptor structure
 #[repr(C)]
+#[allow(dead_code)]
 pub struct HidrawReportDescriptor {
     pub size: u32,
     pub value: [u8; 4096],

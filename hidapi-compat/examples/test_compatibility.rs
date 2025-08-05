@@ -2,7 +2,7 @@
 //!
 //! Run with: cargo run --package hidapi-compat --example test_compatibility
 
-use hidapi_compat::{DeviceInfo, HidApi, HidDevice, HidError};
+use hidapi_compat::{HidApi, HidError};
 
 fn test_api_creation() -> Result<(), HidError> {
     println!("Testing HidApi creation...");

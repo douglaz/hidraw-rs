@@ -73,10 +73,7 @@ impl From<hidraw_rs::Error> for HidError {
             },
             hidraw_rs::Error::NotSupported(msg) => HidError::HidApiError { message: msg },
             hidraw_rs::Error::BufferTooSmall { needed, got } => HidError::HidApiError {
-                message: format!(
-                    "Buffer too small: needed {} bytes, got {} bytes",
-                    needed, got
-                ),
+                message: format!("Buffer too small: needed {needed} bytes, got {got} bytes"),
             },
             hidraw_rs::Error::InvalidPath(msg) => HidError::HidApiError { message: msg },
             hidraw_rs::Error::InvalidData(msg) => HidError::HidApiError { message: msg },

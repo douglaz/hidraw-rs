@@ -90,7 +90,7 @@ pub fn get_device_info(device_path: &Path) -> Result<DeviceInfo> {
 fn find_usb_device_path(start_path: &Path) -> Result<PathBuf> {
     // Canonicalize the path to resolve symlinks and .. components
     let mut current = fs::canonicalize(start_path)
-        .map_err(|e| Error::Parse(format!("Failed to canonicalize path: {}", e)))?;
+        .map_err(|e| Error::Parse(format!("Failed to canonicalize path: {e}")))?;
 
     // Walk up the directory tree looking for idVendor file
     for _ in 0..10 {
@@ -144,7 +144,7 @@ fn read_hex_attr(path: &Path) -> Result<u16> {
 
     let trimmed = content.trim();
     u16::from_str_radix(trimmed, 16)
-        .map_err(|_| Error::Parse(format!("Invalid hex value: {}", trimmed)))
+        .map_err(|_| Error::Parse(format!("Invalid hex value: {trimmed}")))
 }
 
 /// Read a string value from a sysfs attribute file

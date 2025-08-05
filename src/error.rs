@@ -65,7 +65,7 @@ pub enum Error {
 impl Error {
     /// Create an I/O error with custom message
     pub fn io_error(msg: &str) -> Self {
-        Error::Io(io::Error::new(io::ErrorKind::Other, msg))
+        Error::Io(io::Error::other(msg))
     }
 
     /// Check if this is a timeout error

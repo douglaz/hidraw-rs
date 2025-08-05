@@ -27,11 +27,14 @@ pub mod commands {
     pub const STATUS: &[u8; 4] = b"stat";
 
     /// Get XPub
+    #[allow(dead_code)]
     pub const GET_XPUB: &[u8; 4] = b"xpub";
 
     /// Sign transaction
+    #[allow(dead_code)]
     pub const SIGN_TX: &[u8; 4] = b"stxn";
 
     /// Get address
+    #[allow(dead_code)]
     pub const GET_ADDR: &[u8; 4] = b"addr";
 }

@@ -27,8 +27,6 @@ default = []
 async = ["tokio"]
 logging = ["tracing"]
 serialization = ["serde"]
-# Enable this feature to build hidapi-compat for drop-in replacement
-hidapi-compat = []
 
 [[example]]
 name = "list_devices"

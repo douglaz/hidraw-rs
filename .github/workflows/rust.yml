@@ -1,0 +1,81 @@
+name: Rust
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Nix
+      uses: cachix/install-nix-action@v24
+      with:
+        nix_path: nixpkgs=channel:nixos-unstable
+        extra_nix_config: |
+          experimental-features = nix-command flakes
+    
+    - name: Setup Magic Nix Cache
+      uses: DeterminateSystems/magic-nix-cache-action@main
+    
+    - name: Cache Cargo registry
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+        key: cargo-registry-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          cargo-registry-${{ runner.os }}-
+    
+    - name: Check formatting
+      run: nix develop -c cargo fmt --all --check
+    
+    - name: Run linting
+      # TODO: Remove --allow clippy::uninlined_format_args once all format strings are updated
+      run: nix develop -c cargo clippy --locked --workspace --all-targets -- --deny warnings --allow deprecated --allow clippy::uninlined_format_args
+    
+    - name: Build default
+      run: nix develop -c cargo build --all
+    
+    - name: Build with async feature
+      run: nix develop -c cargo build --all --features async
+    
+    - name: Build with all features
+      run: nix develop -c cargo build --all --all-features
+    
+    - name: Build for musl target
+      run: nix develop -c cargo build --all --target x86_64-unknown-linux-musl
+    
+    - name: Run tests
+      run: nix develop -c cargo test --all
+    
+    - name: Run tests with async feature
+      run: nix develop -c cargo test --all --features async
+    
+    - name: Run tests with all features
+      run: nix develop -c cargo test --all --all-features
+    
+    - name: Build examples
+      run: nix develop -c cargo build --all --examples
+    
+    - name: Build hidapi-compat specifically
+      run: nix develop -c cargo build -p hidapi-compat
+    
+    - name: Test hidapi-compat specifically
+      run: nix develop -c cargo test -p hidapi-compat
+    
+    - name: Check documentation
+      run: nix develop -c cargo doc --all --no-deps
+    
+    - name: Build release mode
+      run: nix develop -c cargo build --all --release
