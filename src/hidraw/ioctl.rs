@@ -18,6 +18,7 @@ pub unsafe fn ioctl_read<T>(fd: RawFd, request: u32, arg: *mut T) -> Result<i32>
 }
 
 /// Perform an ioctl write operation
+#[allow(dead_code)]
 pub unsafe fn ioctl_write<T>(fd: RawFd, request: u32, arg: *const T) -> Result<i32> {
     #[cfg(target_env = "musl")]
     let ret = libc::ioctl(fd, request as libc::c_int, arg);

@@ -41,7 +41,7 @@ jobs:
       run: nix develop -c cargo fmt --all --check
     
     - name: Run linting
-      run: nix develop -c cargo clippy --locked --workspace --all-targets -- --deny warnings --allow deprecated --allow dead_code --allow clippy::io_other_error --allow clippy::uninlined_format_args
+      run: nix develop -c cargo clippy --locked --workspace --all-targets -- --deny warnings --allow deprecated
     
     - name: Build default
       run: nix develop -c cargo build --all
