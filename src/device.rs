@@ -148,13 +148,16 @@ impl HidDevice {
             ));
         }
 
-        // Convert timeout to milliseconds, capping at i32::MAX
-        let timeout_ms = timeout.as_millis().min(i32::MAX as u128) as i32;
+        // Convert timeout to Timespec for rustix 1.0
+        let timeout_spec = rustix::time::Timespec {
+            tv_sec: timeout.as_secs() as i64,
+            tv_nsec: timeout.subsec_nanos() as i64,
+        };
 
         // Use rustix's safe poll wrapper
         let mut fds = [PollFd::new(&self.raw, PollFlags::IN)];
 
-        let n = poll(&mut fds, timeout_ms).map_err(|e| Error::Io(e.into()))?;
+        let n = poll(&mut fds, Some(&timeout_spec)).map_err(|e| Error::Io(e.into()))?;
 
         if n == 0 {
             return Err(Error::Timeout);
@@ -176,13 +179,16 @@ impl HidDevice {
     fn write_timeout_impl(&mut self, data: &[u8], timeout: Duration) -> Result<usize> {
         use rustix::event::{poll, PollFd, PollFlags};
 
-        // Convert timeout to milliseconds, capping at i32::MAX
-        let timeout_ms = timeout.as_millis().min(i32::MAX as u128) as i32;
+        // Convert timeout to Timespec for rustix 1.0
+        let timeout_spec = rustix::time::Timespec {
+            tv_sec: timeout.as_secs() as i64,
+            tv_nsec: timeout.subsec_nanos() as i64,
+        };
 
         // Use rustix's safe poll wrapper
         let mut fds = [PollFd::new(&self.raw, PollFlags::OUT)];
 
-        let n = poll(&mut fds, timeout_ms).map_err(|e| Error::Io(e.into()))?;
+        let n = poll(&mut fds, Some(&timeout_spec)).map_err(|e| Error::Io(e.into()))?;
 
         if n == 0 {
             return Err(Error::Timeout);

@@ -3,6 +3,7 @@
 mod device;
 mod enumerate;
 pub(crate) mod ioctl;
+pub(crate) mod ioctl_rustix;
 pub(crate) mod sys;
 
 pub use device::HidrawDevice;
