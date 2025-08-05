@@ -49,9 +49,14 @@ impl HidDevice {
             self.inner.read(buf).map_err(Into::into)
         } else {
             // In non-blocking mode, return immediately
-            self.inner
-                .read_timeout(buf, Duration::from_millis(0))
-                .map_err(Into::into)
+            match self.inner.read_timeout(buf, Duration::from_millis(0)) {
+                Ok(n) => Ok(n),
+                Err(hidraw_rs::Error::Timeout) => {
+                    // hidapi returns 0 for non-blocking read with no data
+                    Ok(0)
+                }
+                Err(e) => Err(e.into()),
+            }
         }
     }
 
@@ -64,7 +69,15 @@ impl HidDevice {
             self.inner.read(buf).map_err(Into::into)
         } else {
             let duration = Duration::from_millis(timeout as u64);
-            self.inner.read_timeout(buf, duration).map_err(Into::into)
+            match self.inner.read_timeout(buf, duration) {
+                Ok(n) => Ok(n),
+                Err(hidraw_rs::Error::Timeout) => {
+                    // hidapi returns 0 when timeout occurs with no data
+                    // This is what rust-coldcard expects for resync operations
+                    Ok(0)
+                }
+                Err(e) => Err(e.into()),
+            }
         }
     }
 
