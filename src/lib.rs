@@ -44,7 +44,7 @@ pub mod async_io;
 pub mod coldcard;
 
 // Re-exports for convenience
-pub use device::{DeviceInfo, HidDevice};
+pub use device::{DeviceInfo, HidDevice, ReportDescriptor};
 pub use error::{Error, Result};
 pub use hidraw::enumerate;
 

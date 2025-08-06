@@ -148,13 +148,16 @@ impl HidDevice {
             ));
         }
 
-        // Convert timeout to milliseconds, capping at i32::MAX
-        let timeout_ms = timeout.as_millis().min(i32::MAX as u128) as i32;
+        // Convert timeout to Timespec for rustix 1.0
+        let timeout_spec = rustix::time::Timespec {
+            tv_sec: timeout.as_secs() as i64,
+            tv_nsec: timeout.subsec_nanos() as i64,
+        };
 
         // Use rustix's safe poll wrapper
         let mut fds = [PollFd::new(&self.raw, PollFlags::IN)];
 
-        let n = poll(&mut fds, timeout_ms).map_err(|e| Error::Io(e.into()))?;
+        let n = poll(&mut fds, Some(&timeout_spec)).map_err(|e| Error::Io(e.into()))?;
 
         if n == 0 {
             return Err(Error::Timeout);
@@ -176,13 +179,16 @@ impl HidDevice {
     fn write_timeout_impl(&mut self, data: &[u8], timeout: Duration) -> Result<usize> {
         use rustix::event::{poll, PollFd, PollFlags};
 
-        // Convert timeout to milliseconds, capping at i32::MAX
-        let timeout_ms = timeout.as_millis().min(i32::MAX as u128) as i32;
+        // Convert timeout to Timespec for rustix 1.0
+        let timeout_spec = rustix::time::Timespec {
+            tv_sec: timeout.as_secs() as i64,
+            tv_nsec: timeout.subsec_nanos() as i64,
+        };
 
         // Use rustix's safe poll wrapper
         let mut fds = [PollFd::new(&self.raw, PollFlags::OUT)];
 
-        let n = poll(&mut fds, timeout_ms).map_err(|e| Error::Io(e.into()))?;
+        let n = poll(&mut fds, Some(&timeout_spec)).map_err(|e| Error::Io(e.into()))?;
 
         if n == 0 {
             return Err(Error::Timeout);
@@ -198,6 +204,59 @@ impl HidDevice {
         }
 
         self.raw.write(data)
+    }
+
+    /// Get the physical location of the device (e.g., USB port path)
+    ///
+    /// This returns a string describing the physical path to the device,
+    /// such as "usb-0000:00:14.0-1/input0".
+    pub fn get_physical_info(&self) -> Result<String> {
+        self.raw.get_raw_phys()
+    }
+
+    /// Get the unique ID of the device
+    ///
+    /// This returns a device-specific unique identifier if available.
+    /// Not all devices provide a unique ID.
+    pub fn get_unique_id(&self) -> Result<String> {
+        self.raw.get_raw_uniq()
+    }
+
+    /// Get the HID report descriptor
+    ///
+    /// The report descriptor defines the format and meaning of data
+    /// transferred between the device and host.
+    pub fn get_report_descriptor(&self) -> Result<ReportDescriptor> {
+        let raw_desc = self.raw.get_report_descriptor()?;
+        Ok(ReportDescriptor {
+            size: raw_desc.size as usize,
+            data: raw_desc.value.to_vec(),
+        })
+    }
+}
+
+/// HID Report Descriptor
+///
+/// Contains the binary report descriptor data that defines the format
+/// of HID reports for this device.
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct ReportDescriptor {
+    /// Size of the descriptor in bytes
+    pub size: usize,
+    /// Raw descriptor data
+    pub data: Vec<u8>,
+}
+
+impl ReportDescriptor {
+    /// Get a slice of the valid descriptor data
+    pub fn as_bytes(&self) -> &[u8] {
+        &self.data[..self.size.min(self.data.len())]
+    }
+
+    /// Check if the descriptor is empty
+    pub fn is_empty(&self) -> bool {
+        self.size == 0
     }
 }
 

@@ -12,7 +12,7 @@ categories = ["hardware-support", "os::linux-apis"]
 [dependencies]
 libc = "0.2"
 thiserror = "1.0"
-rustix = { version = "0.38", features = ["fs", "process", "event"] }
+rustix = { version = "1.0.8", features = ["fs", "process", "event", "std", "time"] }
 
 # Optional dependencies
 tokio = { version = "1.40", features = ["fs", "io-util", "time"], optional = true }
@@ -40,6 +40,14 @@ path = "examples/basic_hid.rs"
 [[example]]
 name = "coldcard_ping"
 path = "examples/coldcard_ping.rs"
+
+[[example]]
+name = "device_info_advanced"
+path = "examples/device_info_advanced.rs"
+
+[[example]]
+name = "report_descriptor"
+path = "examples/report_descriptor.rs"
 
 [workspace]
 members = [".", "hidapi-compat"]
