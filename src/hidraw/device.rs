@@ -135,6 +135,21 @@ impl HidrawDevice {
         // Using rustix for fixed 256-byte buffer
         ioctl::get_raw_name(&self.file)
     }
+    
+    /// Get physical device location
+    pub fn get_raw_phys(&self) -> Result<String> {
+        ioctl::get_raw_phys(&self.file)
+    }
+    
+    /// Get unique device ID
+    pub fn get_raw_uniq(&self) -> Result<String> {
+        ioctl::get_raw_uniq(&self.file)
+    }
+    
+    /// Get report descriptor
+    pub fn get_report_descriptor(&self) -> Result<sys::HidrawReportDescriptor> {
+        ioctl::get_report_descriptor(&self.file)
+    }
 }
 
 impl AsRawFd for HidrawDevice {

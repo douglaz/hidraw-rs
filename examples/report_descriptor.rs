@@ -3,8 +3,7 @@
 //! This example shows how to get and interpret HID report descriptors,
 //! which define the structure of data sent to/from HID devices.
 
-use hidraw_rs::hidraw::{self, HidrawDevice};
-use hidraw_rs::{Error, Result};
+use hidraw_rs::{enumerate, Error, HidDevice, Result};
 
 /// Basic HID report descriptor item parser
 fn parse_report_descriptor(data: &[u8]) {
@@ -53,7 +52,7 @@ fn parse_report_descriptor(data: &[u8]) {
                         indent = indent.saturating_sub(1);
                         print!("End Collection");
                     }
-                    _ => print!("Main[{:X}]", tag),
+                    _ => print!("Main[{tag:X}]"),
                 }
             }
             1 => {
@@ -71,7 +70,7 @@ fn parse_report_descriptor(data: &[u8]) {
                     0x9 => print!("Report Count"),
                     0xA => print!("Push"),
                     0xB => print!("Pop"),
-                    _ => print!("Global[{:X}]", tag),
+                    _ => print!("Global[{tag:X}]"),
                 }
             }
             2 => {
@@ -87,10 +86,10 @@ fn parse_report_descriptor(data: &[u8]) {
                     0x8 => print!("String Minimum"),
                     0x9 => print!("String Maximum"),
                     0xA => print!("Delimiter"),
-                    _ => print!("Local[{:X}]", tag),
+                    _ => print!("Local[{tag:X}]"),
                 }
             }
-            _ => print!("Reserved[{:X}]", tag),
+            _ => print!("Reserved[{tag:X}]"),
         }
 
         // Print data bytes
@@ -141,7 +140,7 @@ fn parse_report_descriptor(data: &[u8]) {
                             0xFF00..=0xFFFF => " - Vendor Defined",
                             _ => "",
                         };
-                        print!("{}", page_name);
+                        print!("{page_name}");
                     }
                     (0, 0xA) => {
                         // Collection
@@ -155,12 +154,12 @@ fn parse_report_descriptor(data: &[u8]) {
                             0x06 => " - Usage Modifier",
                             _ => "",
                         };
-                        print!("{}", coll_name);
+                        print!("{coll_name}");
                     }
                     _ => {}
                 }
 
-                print!(" = {}", value);
+                print!(" = {value}");
             }
         }
 
@@ -176,7 +175,7 @@ fn main() -> Result<()> {
     println!("===================================");
 
     // Get all HID devices
-    let devices = hidraw::enumerate()?;
+    let devices = enumerate()?;
 
     if devices.is_empty() {
         println!("\nNo HID devices found.");
@@ -206,7 +205,7 @@ fn main() -> Result<()> {
     println!("Path: {}", device_info.path.display());
 
     // Open the device
-    let device = match HidrawDevice::open(&device_info.path) {
+    let device = match HidDevice::open(device_info) {
         Ok(d) => d,
         Err(Error::PermissionDenied) => {
             println!("\nPermission denied. Try running with sudo.");
@@ -216,19 +215,19 @@ fn main() -> Result<()> {
     };
 
     // Get and parse the report descriptor
-    match hidraw_rs::hidraw::ioctl::get_report_descriptor(&device) {
+    match device.get_report_descriptor() {
         Ok(desc) => {
             println!("\nReport Descriptor Size: {} bytes", desc.size);
 
-            if desc.size > 0 {
-                let desc_data = &desc.value[..desc.size as usize];
+            if !desc.is_empty() {
+                let desc_data = desc.as_bytes();
 
                 // Show raw hex dump
                 println!("\nRaw Report Descriptor:");
                 for (i, chunk) in desc_data.chunks(16).enumerate() {
                     print!("{:04X}: ", i * 16);
                     for byte in chunk {
-                        print!("{:02X} ", byte);
+                        print!("{byte:02X} ");
                     }
                     println!();
                 }
@@ -238,7 +237,7 @@ fn main() -> Result<()> {
             }
         }
         Err(e) => {
-            println!("\nFailed to get report descriptor: {}", e);
+            println!("\nFailed to get report descriptor: {e}");
         }
     }
 

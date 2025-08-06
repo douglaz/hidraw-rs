@@ -11,7 +11,7 @@ pub use ioctl_rustix::{
 };
 
 // Re-export libc implementations for runtime-sized operations
-pub use ioctl_libc::{ioctl_read, ioctl_read_buf, ioctl_read_int, ioctl_write_buf};
+pub use ioctl_libc::{ioctl_read_buf, ioctl_write_buf};
 
 // Import modules
 use super::{ioctl_libc, ioctl_rustix};

@@ -1,12 +1,10 @@
-//! Example: Get advanced device information using low-level ioctl functions
+//! Example: Get advanced device information using the public API
 //!
-//! This example demonstrates how to use the lower-level hidraw API to get
+//! This example demonstrates how to use HidDevice's methods to get
 //! detailed device information including physical location, unique ID, and
 //! report descriptors.
 
-use hidraw_rs::hidraw::{self, HidrawDevice};
-use hidraw_rs::{Error, Result};
-use std::path::Path;
+use hidraw_rs::{enumerate, Error, HidDevice, Result};
 
 fn print_hex_dump(data: &[u8], max_bytes: usize) {
     let bytes_to_show = data.len().min(max_bytes);
@@ -18,7 +16,7 @@ fn print_hex_dump(data: &[u8], max_bytes: usize) {
             if j == 8 {
                 print!(" ");
             }
-            print!("{:02x} ", byte);
+            print!("{byte:02x} ");
         }
 
         // Padding
@@ -46,11 +44,11 @@ fn print_hex_dump(data: &[u8], max_bytes: usize) {
     }
 }
 
-fn show_device_info(path: &Path) -> Result<()> {
-    println!("\n=== Device: {} ===", path.display());
+fn show_device_info(device_info: &hidraw_rs::DeviceInfo) -> Result<()> {
+    println!("\n=== Device: {} ===", device_info.path.display());
 
     // Open the device
-    let device = match HidrawDevice::open(path) {
+    let device = match HidDevice::open(device_info) {
         Ok(d) => d,
         Err(Error::PermissionDenied) => {
             println!("Permission denied. Try running with sudo.");
@@ -59,58 +57,53 @@ fn show_device_info(path: &Path) -> Result<()> {
         Err(e) => return Err(e),
     };
 
-    // Get basic info using the public API
-    match device.get_raw_info() {
-        Ok(info) => {
-            println!("\nBasic Info:");
-            println!("  Bus Type: 0x{:02x}", info.bustype);
-            println!("  Vendor ID: 0x{:04x}", info.vendor);
-            println!("  Product ID: 0x{:04x}", info.product);
-        }
-        Err(e) => println!("Failed to get basic info: {}", e),
+    // Display basic info from DeviceInfo
+    println!("\nBasic Info:");
+    println!("  Vendor ID: 0x{:04x}", device_info.vendor_id);
+    println!("  Product ID: 0x{:04x}", device_info.product_id);
+    if let Some(name) = &device_info.product {
+        println!("  Product Name: {name}");
+    }
+    if let Some(mfr) = &device_info.manufacturer {
+        println!("  Manufacturer: {mfr}");
+    }
+    if let Some(serial) = &device_info.serial_number {
+        println!("  Serial Number: {serial}");
     }
 
-    // Get device name
-    match device.get_raw_name() {
-        Ok(name) => {
-            println!("  Device Name: {}", name);
-        }
-        Err(e) => println!("Failed to get device name: {}", e),
-    }
-
-    // Now use the low-level ioctl functions directly for advanced info
+    // Now use the public API for advanced info
 
     // Get physical location
-    match hidraw_rs::hidraw::ioctl::get_raw_phys(&device) {
+    match device.get_physical_info() {
         Ok(phys) => {
-            println!("\nPhysical Location: {}", phys);
+            println!("\nPhysical Location: {phys}");
         }
-        Err(e) => println!("\nFailed to get physical location: {}", e),
+        Err(e) => println!("\nFailed to get physical location: {e}"),
     }
 
     // Get unique ID
-    match hidraw_rs::hidraw::ioctl::get_raw_uniq(&device) {
+    match device.get_unique_id() {
         Ok(uniq) => {
             if !uniq.is_empty() {
-                println!("Unique ID: {}", uniq);
+                println!("Unique ID: {uniq}");
             } else {
                 println!("Unique ID: (none)");
             }
         }
-        Err(e) => println!("Failed to get unique ID: {}", e),
+        Err(e) => println!("Failed to get unique ID: {e}"),
     }
 
     // Get report descriptor
     println!("\nReport Descriptor:");
-    match hidraw_rs::hidraw::ioctl::get_report_descriptor(&device) {
+    match device.get_report_descriptor() {
         Ok(desc) => {
             println!("  Size: {} bytes", desc.size);
-            if desc.size > 0 {
+            if !desc.is_empty() {
                 println!("  Data (first 256 bytes):");
-                print_hex_dump(&desc.value[..desc.size as usize], 256);
+                print_hex_dump(desc.as_bytes(), 256);
             }
         }
-        Err(e) => println!("  Failed to get report descriptor: {}", e),
+        Err(e) => println!("  Failed to get report descriptor: {e}"),
     }
 
     Ok(())
@@ -121,7 +114,7 @@ fn main() -> Result<()> {
     println!("======================================");
 
     // Get all HID devices
-    let devices = hidraw::enumerate()?;
+    let devices = enumerate()?;
 
     if devices.is_empty() {
         println!("\nNo HID devices found.");
@@ -139,15 +132,12 @@ fn main() -> Result<()> {
         if i > 0 {
             println!("\n----------------------------------------");
         }
-        show_device_info(&device_info.path)?;
+        show_device_info(device_info)?;
     }
 
     if devices.len() > max_devices {
         println!("\n... and {} more device(s)", devices.len() - max_devices);
-        println!(
-            "(Showing only first {} devices to keep output manageable)",
-            max_devices
-        );
+        println!("(Showing only first {max_devices} devices to keep output manageable)");
     }
 
     Ok(())
