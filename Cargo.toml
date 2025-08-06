@@ -41,6 +41,14 @@ path = "examples/basic_hid.rs"
 name = "coldcard_ping"
 path = "examples/coldcard_ping.rs"
 
+[[example]]
+name = "device_info_advanced"
+path = "examples/device_info_advanced.rs"
+
+[[example]]
+name = "report_descriptor"
+path = "examples/report_descriptor.rs"
+
 [workspace]
 members = [".", "hidapi-compat"]
 

@@ -14,7 +14,6 @@ use crate::hidraw::sys::{
 };
 
 /// Get report descriptor size using rustix
-#[allow(dead_code)]
 pub fn get_report_descriptor_size<Fd: AsFd>(fd: Fd) -> Result<u32> {
     // SAFETY: HIDIOCGRDESCSIZE is a valid opcode for getting a u32
     let getter = unsafe { Getter::<{ HIDIOCGRDESCSIZE }, u32>::new() };
@@ -22,7 +21,6 @@ pub fn get_report_descriptor_size<Fd: AsFd>(fd: Fd) -> Result<u32> {
 }
 
 /// Get raw device info using rustix
-#[allow(dead_code)]
 pub fn get_raw_info<Fd: AsFd>(fd: Fd) -> Result<crate::hidraw::sys::HidrawDevInfo> {
     // SAFETY: HIDIOCGRAWINFO is a valid opcode for getting HidrawDevInfo
     let getter = unsafe { Getter::<{ HIDIOCGRAWINFO }, crate::hidraw::sys::HidrawDevInfo>::new() };
@@ -42,7 +40,6 @@ pub fn get_raw_name<Fd: AsFd>(fd: Fd) -> Result<String> {
 }
 
 /// Get raw physical info using rustix
-#[allow(dead_code)]
 pub fn get_raw_phys<Fd: AsFd>(fd: Fd) -> Result<String> {
     // SAFETY: HIDIOCGRAWPHYS is a valid opcode for getting a 256-byte buffer
     let getter = unsafe { Getter::<{ HIDIOCGRAWPHYS }, [u8; 256]>::new() };
@@ -55,7 +52,6 @@ pub fn get_raw_phys<Fd: AsFd>(fd: Fd) -> Result<String> {
 }
 
 /// Get raw unique ID using rustix
-#[allow(dead_code)]
 pub fn get_raw_uniq<Fd: AsFd>(fd: Fd) -> Result<String> {
     // SAFETY: HIDIOCGRAWUNIQ is a valid opcode for getting a 256-byte buffer
     let getter = unsafe { Getter::<{ HIDIOCGRAWUNIQ }, [u8; 256]>::new() };
@@ -68,7 +64,6 @@ pub fn get_raw_uniq<Fd: AsFd>(fd: Fd) -> Result<String> {
 }
 
 /// Get report descriptor using rustix
-#[allow(dead_code)]
 pub fn get_report_descriptor<Fd: AsFd>(fd: Fd) -> Result<HidrawReportDescriptor> {
     // SAFETY: HIDIOCGRDESC is a valid opcode for getting HidrawReportDescriptor
     let getter = unsafe { Getter::<{ HIDIOCGRDESC }, HidrawReportDescriptor>::new() };

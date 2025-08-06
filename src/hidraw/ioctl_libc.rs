@@ -4,7 +4,6 @@ use crate::{Error, Result};
 use rustix::fd::{AsFd, AsRawFd};
 
 /// Perform an ioctl read operation for getting an integer
-#[allow(dead_code)]
 pub fn ioctl_read_int<Fd: AsFd>(fd: Fd, request: u32) -> Result<i32> {
     // For custom ioctls, we still need to use unsafe libc directly
     // as rustix doesn't provide a way to create custom Getter with runtime request values
@@ -58,7 +57,6 @@ pub fn ioctl_write_buf<Fd: AsFd>(fd: Fd, request: u32, buf: &[u8]) -> Result<usi
 }
 
 /// Perform an ioctl read operation for structured data
-#[allow(dead_code)]
 pub fn ioctl_read<Fd: AsFd, T>(fd: Fd, request: u32, arg: &mut T) -> Result<i32> {
     let fd_raw = fd.as_fd().as_raw_fd();
 
