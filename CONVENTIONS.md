@@ -143,3 +143,19 @@ For format!, println!, info!, debug!, and similar macros:
 - After any changes that touch multiple files
 
 **Important**: Code must be properly formatted and pass all clippy checks before being committed to the repository.
+
+## Test Function Conventions
+
+### Test Functions Must Return Result
+All test functions should return `Result<()>` and use the `?` operator for error handling:
+
+```rust
+#[test]
+fn test_example() -> Result<()> {
+    let value = some_operation()?;
+    assert_eq!(value, expected);
+    Ok(())
+}
+```
+
+This ensures proper error propagation in tests and cleaner test code.
