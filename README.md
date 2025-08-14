@@ -345,11 +345,44 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 git clone https://github.com/yourusername/hidraw-rs
 cd hidraw-rs
 
+# Enter development environment (auto-configures Git hooks)
+nix develop
+
+# Or manually configure Git hooks (for non-nix users)
+git config core.hooksPath .githooks
+```
+
+### Code Quality
+
+Git hooks are **automatically configured** when entering the nix development environment:
+
+#### Automated Checks
+- **pre-commit**: Runs `cargo fmt --check` to ensure code is formatted
+- **pre-push**: Runs both `cargo fmt --check` and `cargo clippy --all-targets -- -D warnings`
+
+#### Manual Checks
+```bash
+# Format code
+cargo fmt
+
+# Run linter
+cargo clippy --all-targets
+
 # Run tests
 cargo test
 
 # Run with logging
 RUST_LOG=debug cargo run --example list_devices
+```
+
+#### Managing Hooks
+```bash
+# Bypass hooks temporarily (not recommended)
+git commit --no-verify
+git push --no-verify
+
+# Disable hooks
+git config --unset core.hooksPath
 ```
 
 ### Running Tests
