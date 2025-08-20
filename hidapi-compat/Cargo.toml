@@ -16,7 +16,7 @@ provides = "hidapi"
 [dependencies]
 hidraw-rs = { path = ".." }
 libc = "0.2"
-thiserror = "1.0"
+thiserror = "2.0"
 
 [dev-dependencies]
 tokio = { version = "1.47", features = ["full"] }
