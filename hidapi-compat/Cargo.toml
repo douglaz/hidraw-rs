@@ -19,7 +19,7 @@ libc = "0.2"
 thiserror = "1.0"
 
 [dev-dependencies]
-tokio = { version = "1.40", features = ["full"] }
+tokio = { version = "1.47", features = ["full"] }
 
 [features]
 default = []
