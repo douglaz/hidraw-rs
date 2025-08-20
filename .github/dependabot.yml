@@ -1,0 +1,46 @@
+version: 2
+updates:
+  # Enable version updates for Rust dependencies
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    groups:
+      patch-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "patch"
+      minor-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+    commit-message:
+      prefix: "cargo(deps)"
+      include: "scope"
+    assignees:
+      - "douglaz"
+    labels:
+      - "dependencies"
+      - "rust"
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "ci(deps)"
+      include: "scope"
+    assignees:
+      - "douglaz"
+    labels:
+      - "dependencies"
+      - "ci"

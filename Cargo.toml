@@ -15,12 +15,12 @@ thiserror = "1.0"
 rustix = { version = "1.0.8", features = ["fs", "process", "event", "std", "time"] }
 
 # Optional dependencies
-tokio = { version = "1.40", features = ["fs", "io-util", "time"], optional = true }
+tokio = { version = "1.47", features = ["fs", "io-util", "time"], optional = true }
 tracing = { version = "0.1", optional = true }
 serde = { version = "1.0", features = ["derive"], optional = true }
 
 [dev-dependencies]
-tokio = { version = "1.40", features = ["full"] }
+tokio = { version = "1.47", features = ["full"] }
 tracing-subscriber = "0.3"
 
 [features]

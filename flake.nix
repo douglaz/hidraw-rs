@@ -95,6 +95,7 @@
             # Development tools
             cargo-watch
             cargo-expand
+            cargo-edit
             rust-analyzer
             
             # For running examples and testing
