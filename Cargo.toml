@@ -11,7 +11,7 @@ categories = ["hardware-support", "os::linux-apis"]
 
 [dependencies]
 libc = "0.2"
-thiserror = "1.0"
+thiserror = "2.0"
 rustix = { version = "1.0.8", features = ["fs", "process", "event", "std", "time"] }
 
 # Optional dependencies
