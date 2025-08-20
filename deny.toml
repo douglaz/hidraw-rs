@@ -1,0 +1,56 @@
+# Configuration for cargo-deny
+# https://github.com/EmbarkStudios/cargo-deny
+
+[bans]
+# Lint level for when multiple versions of the same crate are detected
+multiple-versions = "warn"
+# List of explicitly disallowed crates
+deny = []
+# List of explicitly disallowed crates
+skip = []
+# Skip certain crates when checking for duplicates
+skip-tree = []
+
+[licenses]
+# Use version 2 of the license check
+version = 2
+# List of explicitly allowed licenses
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Unicode-DFS-2016",
+    "Unicode-3.0",
+    "CC0-1.0",
+    "MPL-2.0",
+    "Unlicense",
+]
+# Confidence threshold for license detection (0.0 to 1.0)
+confidence-threshold = 0.8
+# Allow licenses in private crates
+private = { ignore = false }
+
+[sources]
+# Lint level for what to happen when a crate from a crate registry that is not in the allow list is detected
+unknown-registry = "warn"
+# Lint level for what to happen when a crate from a git repository that is not in the allow list is detected
+unknown-git = "warn"
+# List of allowed crate registries
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+# List of allowed Git repositories
+allow-git = []
+
+[advisories]
+# Use version 2 of the advisories check
+version = 2
+# The path where the advisory database is cloned/fetched into
+db-path = "~/.cargo/advisory-db"
+# The url(s) of the advisory databases to use
+db-urls = ["https://github.com/rustsec/advisory-db"]
+# A list of advisory IDs to ignore
+ignore = []
+# The lint level for yanked crates
+yanked = "warn"
