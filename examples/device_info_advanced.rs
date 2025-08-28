@@ -4,7 +4,7 @@
 //! detailed device information including physical location, unique ID, and
 //! report descriptors.
 
-use hidraw_rs::{enumerate, Error, HidDevice, Result};
+use hidraw_rs::{Error, HidDevice, Result, enumerate};
 
 fn print_hex_dump(data: &[u8], max_bytes: usize) {
     let bytes_to_show = data.len().min(max_bytes);

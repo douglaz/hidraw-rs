@@ -1,6 +1,6 @@
 //! Example: Ping a Coldcard device
 
-use hidraw_rs::coldcard::{ColdcardDevice, COINKITE_VID, COLDCARD_PID};
+use hidraw_rs::coldcard::{COINKITE_VID, COLDCARD_PID, ColdcardDevice};
 use hidraw_rs::prelude::*;
 
 fn main() -> Result<()> {

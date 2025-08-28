@@ -9,8 +9,8 @@ use rustix::ioctl::{self, Getter};
 
 // Import the opcode constants and types
 use crate::hidraw::sys::{
-    HidrawReportDescriptor, HIDIOCGRAWINFO, HIDIOCGRAWNAME, HIDIOCGRAWPHYS, HIDIOCGRAWUNIQ,
-    HIDIOCGRDESC, HIDIOCGRDESCSIZE,
+    HIDIOCGRAWINFO, HIDIOCGRAWNAME, HIDIOCGRAWPHYS, HIDIOCGRAWUNIQ, HIDIOCGRDESC, HIDIOCGRDESCSIZE,
+    HidrawReportDescriptor,
 };
 
 /// Get report descriptor size using rustix

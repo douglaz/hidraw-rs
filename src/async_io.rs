@@ -2,7 +2,7 @@
 //!
 //! This module provides async versions of HID device operations using tokio.
 
-use crate::hidraw::{sys, HidrawDevice};
+use crate::hidraw::{HidrawDevice, sys};
 use crate::{DeviceInfo, Error, Result};
 use std::os::unix::io::AsRawFd;
 use std::path::{Path, PathBuf};
