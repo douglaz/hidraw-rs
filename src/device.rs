@@ -140,7 +140,7 @@ impl HidDevice {
 
     /// Internal implementation of read with timeout
     fn read_timeout_impl(&mut self, buf: &mut [u8], timeout: Duration) -> Result<usize> {
-        use rustix::event::{poll, PollFd, PollFlags};
+        use rustix::event::{PollFd, PollFlags, poll};
 
         if buf.is_empty() {
             return Err(Error::InvalidParameter(
@@ -177,7 +177,7 @@ impl HidDevice {
 
     /// Internal implementation of write with timeout
     fn write_timeout_impl(&mut self, data: &[u8], timeout: Duration) -> Result<usize> {
-        use rustix::event::{poll, PollFd, PollFlags};
+        use rustix::event::{PollFd, PollFlags, poll};
 
         // Convert timeout to Timespec for rustix 1.0
         let timeout_spec = rustix::time::Timespec {

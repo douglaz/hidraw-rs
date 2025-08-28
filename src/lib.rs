@@ -50,9 +50,9 @@ pub use hidraw::enumerate;
 
 /// Prelude module for convenient imports
 pub mod prelude {
-    pub use crate::{enumerate, find_devices};
     pub use crate::{DeviceInfo, HidDevice};
     pub use crate::{Error, Result};
+    pub use crate::{enumerate, find_devices};
 }
 
 /// Find devices matching vendor and product ID

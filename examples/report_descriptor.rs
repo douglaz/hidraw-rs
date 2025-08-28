@@ -3,7 +3,7 @@
 //! This example shows how to get and interpret HID report descriptors,
 //! which define the structure of data sent to/from HID devices.
 
-use hidraw_rs::{enumerate, Error, HidDevice, Result};
+use hidraw_rs::{Error, HidDevice, Result, enumerate};
 
 /// Basic HID report descriptor item parser
 fn parse_report_descriptor(data: &[u8]) {
